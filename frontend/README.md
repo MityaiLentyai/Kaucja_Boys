@@ -1,67 +1,142 @@
 # Kaucja Boys — Frontend Web App
 
-Next.js web application for scanning vouchers, managing universal wallet balances, displaying checkout payment QRs, and browsing deposit machines.
+Next.js frontend for the Kaucja Boys universal deposit-wallet demo. The app provides the user-facing flow for signing in, viewing a wallet balance, scanning deposit vouchers, and starting QR-based payments.
 
-## 🛠️ Stack
+## Stack
 
-- **Framework:** Next.js 14+ (App Router, TypeScript)
-- **Styling:** Tailwind CSS + Lucide Icons
-- **Scanning & QR:** `@zxing/browser` + `react-qr-code`
+- Next.js `16.3.8` with the App Router
+- React `19`
+- TypeScript
+- Tailwind CSS `4`
+- `@zxing/browser` for barcode scanning
+- `react-qr-code` for QR-code rendering
+- Lucide React for icons
 
----
+## Project structure
 
-## 🚀 Quickstart Guide for Teammates
+```text
+frontend/
+├── app/
+│   ├── dashboard/       # Authenticated wallet dashboard
+│   ├── login/           # Login page
+│   ├── globals.css      # Global styles
+│   ├── layout.tsx       # Root layout and metadata
+│   └── page.tsx         # Landing page
+├── lib/
+│   ├── api.ts           # API client for the FastAPI backend
+│   └── auth.ts          # Client-side authentication helpers
+├── public/              # Static assets
+├── next.config.ts
+├── package.json
+├── postcss.config.mjs
+└── tsconfig.json
+```
+
+## Current application flow
+
+1. Open the landing page at `/`.
+2. Navigate to `/login` and authenticate with the backend.
+3. The dashboard at `/dashboard` loads the current user and wallet through the API client.
+4. Use the dashboard actions to continue to voucher scanning or QR payment flows as those screens are implemented.
+
+The dashboard currently displays:
+
+- The authenticated user's name or email
+- The current wallet balance in PLN
+- Navigation to voucher scanning
+- Navigation to QR payment
+
+## Quickstart
 
 ### 1. Prerequisites
 
-Ensure you have **Node.js 18+** installed.
+Install Node.js 18 or newer and npm.
 
-### 2. Install Dependencies
+### 2. Install dependencies
 
-From the project root:
+From the repository root:
 
 ```bash
 cd frontend
 npm install
 ```
 
-### 3. Environment Setup
+### 3. Configure the backend URL
 
-Create a .env.local file inside the frontend/ directory:
-Code snippet
+Create `frontend/.env.local`:
 
-```bash
+```env
 NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
-### 4. Run DEvelopment Server
+The backend must be running at this URL for login and dashboard requests to work.
+
+### 4. Start the development server
 
 ```bash
 npm run dev
 ```
 
-The frontend will be live at http://localhost:3000.
+Open http://localhost:3000 in your browser.
 
-## 📂 Project Structure
+## Available scripts
 
-frontend/
-├── app/ # Next.js App Router pages
-├── components/ # Shared UI components (Scanner, Wallet, Map)
-├── lib/
-│ └── api.ts # Centralized API fetcher pointing to FastAPI backend
-└── public/ # Static assets
+```bash
+npm run dev      # Start the development server
+npm run build    # Create a production build
+npm run start    # Serve the production build
+npm run lint     # Run ESLint
+```
 
-## 🔌 Connecting to Backend API
+## API integration
 
-All backend calls should go through frontend/lib/api.ts. It handles authorization headers automatically when tokens are stored in localStorage.
-Example usage:
-TypeScript
-import { apiFetch } from '@/lib/api';
+Frontend requests should use `frontend/lib/api.ts` rather than calling `fetch` directly. The helper uses `NEXT_PUBLIC_API_URL` as the base URL and adds the stored bearer token to authenticated requests.
 
-// Example: Fetch user profile
-const profile = await apiFetch('/auth/me');
+Example:
 
-## ⚠️ Notes for Teammates
+```tsx
+import { apiFetch } from "@/lib/api";
 
-Make sure the FastAPI backend is running on http://localhost:8000 before running client interactions.
-Clear browser localStorage if you run into authentication state issues during rapid testing.
+const profile = await apiFetch("/auth/me");
+const wallet = await apiFetch("/wallet");
+```
+
+The current dashboard uses these backend endpoints:
+
+- `GET /auth/me`
+- `GET /wallet`
+
+Authentication requests are handled through the `/auth` endpoints exposed by the backend.
+
+## Local development with the backend
+
+Run the backend in a separate terminal:
+
+```bash
+cd backend
+source venv/bin/activate       # Linux/macOS
+# venv\Scripts\activate        # Windows
+uvicorn app.main:app --reload --port 8000
+```
+
+Then start the frontend:
+
+```bash
+cd frontend
+npm run dev
+```
+
+For the seeded demo account, see [`backend/README.md`](../backend/README.md).
+
+## Troubleshooting
+
+- If API requests fail, verify that the backend is running on port `8000`.
+- If the frontend uses an incorrect API URL, check `frontend/.env.local` and restart the dev server.
+- If authentication appears stuck during testing, clear the app's browser `localStorage` and log in again.
+- Camera-based scanning requires browser permission and normally works best in a secure context such as HTTPS or localhost.
+
+## Notes for contributors
+
+- Keep frontend API calls centralized in `lib/api.ts`.
+- Keep secrets out of client-side environment variables; only values prefixed with `NEXT_PUBLIC_` are exposed to the browser.
+- Run `npm run lint` before committing frontend changes.
