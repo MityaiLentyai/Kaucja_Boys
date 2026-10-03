@@ -487,14 +487,6 @@ For hackathon demo:
 - add machine modal/page
 - profile page
 
-## Cashier/admin pages
-
-- cashier login
-- scan customer QR
-- deduct amount
-- success/failure result
-- admin voucher viewer (optional)
-
 ---
 
 # 13. Suggested UI structure
@@ -528,14 +520,6 @@ Cards:
   - yellow = mixed reports
 - machine detail bottom sheet
 - quick tags for reviews
-
-## Cashier screen
-
-- scan QR / enter code
-- fetch wallet
-- input redemption amount
-- confirm
-- display transaction success
 
 ---
 
@@ -763,38 +747,6 @@ The key is **ruthless scope control**.
 - redemption endpoints
 - DB models
 - deployment
-
-## If 3 people
-
-### Person A
-
-frontend core
-
-### Person B
-
-backend core
-
-### Person C
-
-map/reviews + polish + pitch deck + seeded data + demo testing
-
-## If 4 people
-
-### Person A
-
-auth/dashboard/wallet
-
-### Person B
-
-scan + QR + cashier screen
-
-### Person C
-
-backend/API/database
-
-### Person D
-
-map/reviews/deployment/presentation
 
 ---
 
