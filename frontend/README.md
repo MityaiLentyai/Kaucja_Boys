@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kaucja Boys — Frontend Web App
 
-## Getting Started
+Next.js web application for scanning vouchers, managing universal wallet balances, displaying checkout payment QRs, and browsing deposit machines.
 
-First, run the development server:
+## 🛠️ Stack
+
+- **Framework:** Next.js 14+ (App Router, TypeScript)
+- **Styling:** Tailwind CSS + Lucide Icons
+- **Scanning & QR:** `@zxing/browser` + `react-qr-code`
+
+---
+
+## 🚀 Quickstart Guide for Teammates
+
+### 1. Prerequisites
+
+Ensure you have **Node.js 18+** installed.
+
+### 2. Install Dependencies
+
+From the project root:
+
+```bash
+cd frontend
+npm install
+```
+
+### 3. Environment Setup
+
+Create a .env.local file inside the frontend/ directory:
+Code snippet
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+### 4. Run DEvelopment Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The frontend will be live at http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📂 Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+frontend/
+├── app/ # Next.js App Router pages
+├── components/ # Shared UI components (Scanner, Wallet, Map)
+├── lib/
+│ └── api.ts # Centralized API fetcher pointing to FastAPI backend
+└── public/ # Static assets
 
-## Learn More
+## 🔌 Connecting to Backend API
 
-To learn more about Next.js, take a look at the following resources:
+All backend calls should go through frontend/lib/api.ts. It handles authorization headers automatically when tokens are stored in localStorage.
+Example usage:
+TypeScript
+import { apiFetch } from '@/lib/api';
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+// Example: Fetch user profile
+const profile = await apiFetch('/auth/me');
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ⚠️ Notes for Teammates
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Make sure the FastAPI backend is running on http://localhost:8000 before running client interactions.
+Clear browser localStorage if you run into authentication state issues during rapid testing.
