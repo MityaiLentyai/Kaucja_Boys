@@ -1,1 +1,11 @@
 venv/
+.next/
+build/
+dist/
+.next/
+
+# Backend
+*.pyc
+*.pyo
+*.pyd
+*.db
