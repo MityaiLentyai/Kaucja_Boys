@@ -120,31 +120,29 @@ export default function ScanVoucherPage() {
         reader.timeBetweenDecodingAttempts = 250;
         codeReaderRef.current = reader;
 
-        const stream = await getCameraStream();
+        // 1. Get available video devices via ZXing (Brave-friendly)
+        const videoInputDevices = await reader.listVideoInputDevices();
 
-        if (!isMounted) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
+        if (!videoInputDevices || videoInputDevices.length === 0) {
+          throw new Error("No camera devices found.");
         }
 
-        streamRef.current = stream;
+        // 2. Select back camera (or default to first device)
+        const backCamera = videoInputDevices.find((device) =>
+          /back|rear|environment/i.test(device.label),
+        );
+        const selectedDeviceId = backCamera ? backCamera.deviceId : videoInputDevices[0].deviceId;
 
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.setAttribute("playsinline", "true");
-          videoRef.current.setAttribute("autoplay", "true");
-          videoRef.current.setAttribute("muted", "true");
+        if (!isMounted) return;
 
-          await videoRef.current.play().catch(() => {});
-
-          reader.decodeFromStream(stream, videoRef.current, (result) => {
-            if (result && !isSubmittingRef.current && isMounted) {
-              isSubmittingRef.current = true;
-              const code = result.getText();
-              handleVoucherSubmit(code);
-            }
-          });
-        }
+        // 3. Decode directly using deviceId (bypasses strict constraint fingerprint blocking)
+        await reader.decodeFromVideoDevice(selectedDeviceId, videoRef.current, (result) => {
+          if (result && !isSubmittingRef.current && isMounted) {
+            isSubmittingRef.current = true;
+            const code = result.getText();
+            handleVoucherSubmit(code);
+          }
+        });
       } catch (err: any) {
         if (isMounted) {
           setCameraError(
