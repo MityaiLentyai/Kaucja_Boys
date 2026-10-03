@@ -120,22 +120,33 @@ export default function ScanVoucherPage() {
         reader.timeBetweenDecodingAttempts = 250;
         codeReaderRef.current = reader;
 
-        // 1. Get available video devices via ZXing (Brave-friendly)
-        const videoInputDevices = await reader.listVideoInputDevices();
+        // 1. Force permission request first to ensure hardware labels are populated
+        let selectedDeviceId: string | null = null;
 
-        if (!videoInputDevices || videoInputDevices.length === 0) {
-          throw new Error("No camera devices found.");
+        try {
+          const initialStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" },
+            audio: false,
+          });
+
+          // Release initial warm-up stream tracks so ZXing can bind to the camera cleanly
+          initialStream.getTracks().forEach((track) => track.stop());
+
+          // 2. Enumerate devices now that permissions are granted
+          const videoInputDevices = await reader.listVideoInputDevices();
+          if (videoInputDevices && videoInputDevices.length > 0) {
+            const backCamera = videoInputDevices.find((device) =>
+              /back|rear|environment/i.test(device.label),
+            );
+            selectedDeviceId = backCamera ? backCamera.deviceId : videoInputDevices[0].deviceId;
+          }
+        } catch (permErr) {
+          // If permission warming fails or returns no devices, let ZXing attempt native default fallback
         }
-
-        // 2. Select back camera (or default to first device)
-        const backCamera = videoInputDevices.find((device) =>
-          /back|rear|environment/i.test(device.label),
-        );
-        const selectedDeviceId = backCamera ? backCamera.deviceId : videoInputDevices[0].deviceId;
 
         if (!isMounted) return;
 
-        // 3. Decode directly using deviceId (bypasses strict constraint fingerprint blocking)
+        // 3. Decode using selected deviceId (or undefined for native browser default camera)
         await reader.decodeFromVideoDevice(selectedDeviceId, videoRef.current, (result) => {
           if (result && !isSubmittingRef.current && isMounted) {
             isSubmittingRef.current = true;
