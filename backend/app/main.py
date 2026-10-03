@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from app.db.session import engine, Base, SessionLocal
-from app.routers import auth, wallet
+from app.routers import auth, wallet, vouchers
 from app.db.models import User, UserRole, Voucher, VoucherStatus
 from app.core.security import get_password_hash
 
@@ -21,6 +21,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(wallet.router)
+app.include_router(vouchers.router)
 
 @app.on_event("startup")
 def seed_demo_data():

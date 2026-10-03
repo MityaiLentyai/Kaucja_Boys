@@ -41,11 +41,11 @@ class VoucherScanRequest(BaseModel):
     raw_payload: Optional[str] = None
 
 class VoucherScanResponse(BaseModel):
-    voucher_id: str
-    code: str
+    message: str
+    voucher_code: str
     amount: float
-    new_wallet_balance: float
-    status: str
+    issuer_store: str
+    new_balance: float
 
 # QR & Cashier Schemas
 class RedemptionTokenCreate(BaseModel):
