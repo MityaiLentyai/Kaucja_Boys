@@ -17,7 +17,6 @@ export default function ScanVoucherPage() {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Persistent references for cleanup and hardware control
   const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const isSubmittingRef = useRef(false);
@@ -29,14 +28,11 @@ export default function ScanVoucherPage() {
     null,
   );
 
-  // Cleanly release camera stream and reset ZXing reader
   const stopCameraHardware = () => {
     if (codeReaderRef.current) {
       try {
         codeReaderRef.current.reset();
-      } catch (err) {
-        // Ignore unmount reset exceptions
-      }
+      } catch (err) {}
       codeReaderRef.current = null;
     }
 
@@ -52,10 +48,39 @@ export default function ScanVoucherPage() {
       videoRef.current.srcObject = null;
     }
   };
+
+  const getCameraStream = async (): Promise<MediaStream> => {
+    const constraintSets: MediaStreamConstraints[] = [
+      {
+        video: {
+          facingMode: { exact: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      },
+      {
+        video: { facingMode: "environment" },
+        audio: false,
+      },
+      {
+        video: true,
+        audio: false,
+      },
+    ];
+
+    for (const constraints of constraintSets) {
+      try {
+        return await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (err) {}
+    }
+
+    throw new Error("Unable to acquire camera stream with any constraint.");
+  };
+
   useEffect(() => {
     let isMounted = true;
 
-    // Suppress ZXing's internal NotFoundException / ChecksumException console spam
     const originalConsoleErr = console.error;
     const originalConsoleLog = console.log;
 
@@ -68,7 +93,7 @@ export default function ScanVoucherPage() {
           msg.includes("ChecksumException") ||
           msg.includes("FormatTracker")
         ) {
-          return; // Ignore ZXing scan attempt frame exceptions
+          return;
         }
         originalFn.apply(console, args);
       };
@@ -81,7 +106,6 @@ export default function ScanVoucherPage() {
       try {
         setCameraError(null);
 
-        // Configure scanner hints for 1D voucher barcodes
         const hints = new Map();
         hints.set(DecodeHintType.POSSIBLE_FORMATS, [
           BarcodeFormat.EAN_13,
@@ -96,11 +120,7 @@ export default function ScanVoucherPage() {
         reader.timeBetweenDecodingAttempts = 250;
         codeReaderRef.current = reader;
 
-        // Request camera media stream directly
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false,
-        });
+        const stream = await getCameraStream();
 
         if (!isMounted) {
           stream.getTracks().forEach((t) => t.stop());
@@ -111,6 +131,10 @@ export default function ScanVoucherPage() {
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          videoRef.current.setAttribute("playsinline", "true");
+          videoRef.current.setAttribute("autoplay", "true");
+          videoRef.current.setAttribute("muted", "true");
+
           await videoRef.current.play().catch(() => {});
 
           reader.decodeFromStream(stream, videoRef.current, (result) => {
@@ -135,7 +159,6 @@ export default function ScanVoucherPage() {
     return () => {
       isMounted = false;
       stopCameraHardware();
-      // Restore standard console functions on page leave
       console.error = originalConsoleErr;
       console.log = originalConsoleLog;
     };
@@ -153,7 +176,6 @@ export default function ScanVoucherPage() {
         body: JSON.stringify({ barcode: barcodeToSubmit }),
       });
 
-      // Turn off camera hardware immediately after successful scan
       stopCameraHardware();
 
       setFeedback({
@@ -252,8 +274,7 @@ export default function ScanVoucherPage() {
         </div>
         <p className="text-xs text-gray-400">
           Demo codes available: <code className="bg-gray-100 px-1 py-0.5 rounded">KAUCJA-100</code>{" "}
-          (10 PLN), <code className="bg-gray-100 px-1 py-0.5 rounded">KAUCJA-050</code> (5
-          PLN)[cite: 2].
+          (10 PLN), <code className="bg-gray-100 px-1 py-0.5 rounded">KAUCJA-050</code> (5 PLN).
         </p>
       </div>
     </div>
