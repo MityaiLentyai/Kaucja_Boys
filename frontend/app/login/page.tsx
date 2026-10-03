@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/auth/login`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://kaucja-boys.onrender.com"}/auth/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
