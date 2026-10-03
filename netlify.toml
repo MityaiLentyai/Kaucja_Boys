@@ -1,19 +1,10 @@
-# ==============================================================================
-# Build Settings
-# ==============================================================================
 [build]
-  # Path to your Next.js frontend directory inside the monorepo
-  base    = "frontend"  
+  base    = "frontend"
   command = "npm run build"
-  publish = ".next"
+  publish = "frontend/.next" # Or leave publish out so Netlify's Next.js plugin auto-detects it
 
 [[redirects]]
   from   = "/api/*"
-  to     = "https://your-backend-name.onrender.com/api/:splat"
+  to     = "https://kaucja-boys.onrender.com/api/:splat"
   status = 200
   force  = true
-
-[[redirects]]
-  from   = "/*"
-  to     = "/index.html"
-  status = 200
