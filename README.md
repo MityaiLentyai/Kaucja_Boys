@@ -60,6 +60,7 @@ Instead, we build:
 7. Cashier scans the QR code.
 8. Backend deducts the amount from the wallet and records the transaction.
 9. Users can browse nearby deposit machines and submit reviews/status.
+10. Users get points for every deposit made, points that will be used for getting sponsored vouchers/discounts
 
 ## Stage 2 vision
 
@@ -67,8 +68,7 @@ Instead, we build:
 - debt tracking until physical return in 1–2 days
 - machine-side QR user identification
 - courier pickup marketplace for bottle collection
-
----
+- ***
 
 # 4. Recommended tech stack
 
