@@ -1,73 +1,114 @@
 # Kaucja Boys — Backend API
 
-FastAPI service powering the universal deposit-voucher wallet, barcode claim verification, QR payment redemption, and machine mapping logic.
+FastAPI service for the Kaucja Boys demo app. The backend provides authentication, wallet management, and seeded demo data used by the frontend.
 
-## 🛠️ Stack
+## Stack
 
-- **Framework:** FastAPI (Python 3.10+)
-- **ORM:** SQLAlchemy
-- **Database:** SQLite (default for development: `kaucja.db`)
-- **Authentication:** JWT + Passlib (bcrypt)
-- **Settings Management:** Pydantic Settings
+- Python 3.10+
+- FastAPI
+- SQLAlchemy
+- SQLite (development default)
+- JWT authentication
+- Pydantic settings
 
----
+## Project structure
 
-## 🚀 Quickstart Guide for Teammates
+```text
+backend/
+├── app/
+│   ├── core/
+│   │   ├── config.py
+│   │   └── security.py
+│   ├── db/
+│   │   ├── models.py
+│   │   ├── session.py
+│   │   └── __init__.py
+│   ├── routers/
+│   │   ├── auth.py
+│   │   └── wallet.py
+│   ├── schemas/
+│   │   └── contracts.py
+│   ├── services/
+│   │   └── wallet_service.py
+│   └── main.py
+├── requirements.txt
+├── README.md
+└── kaucja.db
+```
+
+## Current functionality
+
+- User registration: `POST /auth/register`
+- User login: `POST /auth/login`
+- Current user: `GET /auth/me`
+- Wallet summary: `GET /wallet`
+- Wallet transactions: `GET /wallet/transactions`
+
+The app also seeds a demo account automatically on startup:
+
+- Email: `demo@kaucja.pl`
+- Password: `password123`
+
+## Quickstart
 
 ### 1. Prerequisites
 
-Ensure you have Python 3.10+ installed on your system.
+Make sure Python 3.10+ is installed.
 
-### 2. Setup Virtual Environment
-
-From the project root:
+### 2. Create and activate a virtual environment
 
 ```bash
 cd backend
 python3 -m venv venv
-
-# Activate on Linux/macOS:
-source venv/bin/activate
-
-# Activate on Windows (CMD/PowerShell):
-# venv\Scripts\activate
+source venv/bin/activate   # Linux/macOS
+# or
+# venv\Scripts\activate  # Windows
 ```
 
-### 3. Install Dependecies
+### 3. Install dependencies
 
 ```bash
 pip install fastapi uvicorn sqlalchemy pydantic pydantic-settings python-jose passlib bcrypt python-multipart
 ```
 
-### 4. Run Development Server
+If the repo includes a `requirements.txt`, you can also use:
 
 ```bash
-uvicorn app.main:app --reload --port 8000
+pip install -r requirements.txt
 ```
 
-`The server will be live at http://localhost:8000`
+### 4. Run the API
 
-## 📑 Interactive API Documentation
-
-Once the server is running, you can access the automatically generated interactive docs:
-
-```
-Swagger UI: http://localhost:8000/docs
-ReDoc: http://localhost:8000/redoc
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## 🗄️ Database Architecture
+The API will be available at:
 
-- Database tables are initialized automatically on startup (Base.metadata.create_all).
-- users — Authentication & user roles (user, cashier, admin).
-- wallets — One-to-one mapping with users tracking live balance.
-- wallet_transactions — Immutable ledger recording top-ups, redemptions, and releases.
-- vouchers — Deposit machine receipts & claim state.
-- redemption_tokens — Short-lived signed tokens for dynamic payment QR generation.
-- redemptions — Completed store cashier deductions.
-- machines & machine_reviews — Deposit machine locations and community status reports.
+- http://localhost:8000
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
 
-## ⚠️ Notes for Teammates
+## Database
 
-- Do not commit .db or .pyc files. SQLite data files and compiled bytecode are ignored by Git.
-- Default DB will be created locally as kaucja.db in the backend/ root directory.
+The app uses SQLite by default for local development. The database file is created in the backend directory as `kaucja.db`.
+
+Models include:
+
+- `User`
+- `Wallet`
+- `WalletTransaction`
+- `Voucher`
+
+## Notes for contributors
+
+- Do not commit local SQLite database files or Python bytecode artifacts.
+- Keep API routes and wallet logic consistent with the frontend assumptions.
+- If you add new endpoints, update the frontend API client usage accordingly.
+
+## Example flow
+
+1. Register or log in as a user.
+2. Fetch protected wallet data from `/wallet`.
+3. Use demo voucher codes seeded by the app for testing.
+4. Manage wallet balances and transaction history from the frontend.
