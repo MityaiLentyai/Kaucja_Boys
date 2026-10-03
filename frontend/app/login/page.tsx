@@ -20,14 +20,11 @@ export default function LoginPage() {
     formData.append("password", password);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://kaucja-boys.onrender.com"}/auth/login`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: formData,
-        },
-      );
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData,
+      });
 
       if (!res.ok) throw new Error("Invalid credentials");
 
