@@ -1,7 +1,7 @@
 [build]
-  base    = "frontend"
+  base    = "frontend"  
   command = "npm run build"
-  publish = "frontend/.next" # Or leave publish out so Netlify's Next.js plugin auto-detects it
+  publish = ".next"
 
 [[redirects]]
   from   = "/api/*"
