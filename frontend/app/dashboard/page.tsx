@@ -44,13 +44,19 @@ export default function DashboardPage() {
           onClick={() => router.push("/scan")}
           className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md font-semibold text-gray-800"
         >
-          📷 Scan Voucher
+          🎟️ Scan Voucher
         </button>
         <button
           onClick={() => router.push("/pay")}
           className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md font-semibold text-gray-800"
         >
           💳 Pay with QR
+        </button>
+        <button
+          onClick={() => router.push("/itemscan")}
+          className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md font-semibold text-gray-800"
+        >
+          🥫 Scan Items
         </button>
       </div>
     </div>

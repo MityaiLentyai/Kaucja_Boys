@@ -49,35 +49,6 @@ export default function ScanVoucherPage() {
     }
   };
 
-  const getCameraStream = async (): Promise<MediaStream> => {
-    const constraintSets: MediaStreamConstraints[] = [
-      {
-        video: {
-          facingMode: { exact: "environment" },
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-        audio: false,
-      },
-      {
-        video: { facingMode: "environment" },
-        audio: false,
-      },
-      {
-        video: true,
-        audio: false,
-      },
-    ];
-
-    for (const constraints of constraintSets) {
-      try {
-        return await navigator.mediaDevices.getUserMedia(constraints);
-      } catch (err) {}
-    }
-
-    throw new Error("Unable to acquire camera stream with any constraint.");
-  };
-
   useEffect(() => {
     let isMounted = true;
 
@@ -108,6 +79,7 @@ export default function ScanVoucherPage() {
 
         const hints = new Map();
         hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+          BarcodeFormat.QR_CODE, // Added QR code support
           BarcodeFormat.EAN_13,
           BarcodeFormat.EAN_8,
           BarcodeFormat.CODE_128,
@@ -120,7 +92,6 @@ export default function ScanVoucherPage() {
         reader.timeBetweenDecodingAttempts = 250;
         codeReaderRef.current = reader;
 
-        // 1. Force permission request first to ensure hardware labels are populated
         let selectedDeviceId: string | null = null;
 
         try {
@@ -129,10 +100,8 @@ export default function ScanVoucherPage() {
             audio: false,
           });
 
-          // Release initial warm-up stream tracks so ZXing can bind to the camera cleanly
           initialStream.getTracks().forEach((track) => track.stop());
 
-          // 2. Enumerate devices now that permissions are granted
           const videoInputDevices = await reader.listVideoInputDevices();
           if (videoInputDevices && videoInputDevices.length > 0) {
             const backCamera = videoInputDevices.find((device) =>
@@ -140,13 +109,10 @@ export default function ScanVoucherPage() {
             );
             selectedDeviceId = backCamera ? backCamera.deviceId : videoInputDevices[0].deviceId;
           }
-        } catch (permErr) {
-          // If permission warming fails or returns no devices, let ZXing attempt native default fallback
-        }
+        } catch (permErr) {}
 
         if (!isMounted) return;
 
-        // 3. Decode using selected deviceId (or undefined for native browser default camera)
         await reader.decodeFromVideoDevice(selectedDeviceId, videoRef.current, (result) => {
           if (result && !isSubmittingRef.current && isMounted) {
             isSubmittingRef.current = true;
@@ -199,7 +165,7 @@ export default function ScanVoucherPage() {
       isSubmittingRef.current = false;
       setFeedback({
         type: "error",
-        message: err.message || "Failed to process barcode voucher.",
+        message: err.message || "Failed to process voucher.",
       });
     } finally {
       setLoading(false);

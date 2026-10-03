@@ -9,10 +9,13 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): 
     ...((options.headers as Record<string, string>) || {}),
   };
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL || "https://kaucja-boys.onrender.com"}${endpoint}`,
+    {
+      ...options,
+      headers,
+    },
+  );
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
