@@ -174,7 +174,7 @@ export default function ScanItemPage() {
       if (typeof err.detail === "string") return err.detail;
       if (Array.isArray(err.detail)) {
         return err.detail
-          .map((item) => (typeof item === "string" ? item : item.msg || JSON.stringify(item)))
+          .map((item: any) => (typeof item === "string" ? item : item.msg || JSON.stringify(item)))
           .join(", ");
       }
       if (typeof err.detail === "object") {
