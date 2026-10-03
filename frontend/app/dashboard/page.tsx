@@ -30,7 +30,7 @@ export default function DashboardPage() {
       <header className="flex justify-between items-center border-b pb-4">
         <div>
           <h1 className="text-xl font-bold">Hello, {user.full_name || user.email}</h1>
-          <p className="text-sm text-gray-500">Universal Kaucja Wallet</p>
+          <p className="text-sm text-gray-500">KauCash Wallet</p>
         </div>
       </header>
 
