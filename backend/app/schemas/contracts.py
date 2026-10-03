@@ -2,7 +2,16 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
 
-# Auth Schemas
+class ItemScanRequest(BaseModel):
+    barcode: str
+
+class ItemScanResponse(BaseModel):
+    is_valid: bool
+    item_name: Optional[str] = None
+    deposit_value: float
+    message: str
+
+
 class UserRegister(BaseModel):
     email: EmailStr
     password: str
@@ -11,6 +20,15 @@ class UserRegister(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class FinishScanSessionRequest(BaseModel):
+    item_count: int
+    total_amount: float
+
+class FinishScanSessionResponse(BaseModel):
+    message: str
+    credited_amount: float
+    new_balance: float
 
 class TokenResponse(BaseModel):
     access_token: str
