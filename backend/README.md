@@ -4,7 +4,7 @@ FastAPI service for the Kaucja Boys demo app. The backend provides authenticatio
 
 ## Stack
 
-- Python 3.10+
+- Python 3.12+ via [uv](https://docs.astral.sh/uv/)
 - FastAPI
 - SQLAlchemy
 - SQLite (development default)
@@ -31,9 +31,10 @@ backend/
 │   ├── services/
 │   │   └── wallet_service.py
 │   └── main.py
-├── requirements.txt
-├── README.md
-└── kaucja.db
+├── pyproject.toml
+├── uv.lock
+├── .python-version
+└── README.md
 ```
 
 ## Current functionality
@@ -53,34 +54,21 @@ The app also seeds a demo account automatically on startup:
 
 ### 1. Prerequisites
 
-Make sure Python 3.10+ is installed.
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/). It provides Python 3.12 when the project pin in `.python-version` is not already installed.
 
-### 2. Create and activate a virtual environment
+### 2. Install dependencies
 
 ```bash
 cd backend
-python3 -m venv venv
-source venv/bin/activate   # Linux/macOS
-# or
-# venv\Scripts\activate  # Windows
+uv sync
 ```
 
-### 3. Install dependencies
+Runtime dependencies are declared in `pyproject.toml` and locked in `uv.lock`. Add a package with `uv add <package>` so the lockfile stays current.
+
+### 3. Run the API
 
 ```bash
-pip install fastapi uvicorn sqlalchemy pydantic pydantic-settings python-jose passlib bcrypt python-multipart
-```
-
-If the repo includes a `requirements.txt`, you can also use:
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Run the API
-
-```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 The API will be available at:
@@ -102,7 +90,7 @@ Models include:
 
 ## Notes for contributors
 
-- Do not commit local SQLite database files or Python bytecode artifacts.
+- Do not commit `.venv/`, local SQLite database files, or Python bytecode artifacts.
 - Keep API routes and wallet logic consistent with the frontend assumptions.
 - If you add new endpoints, update the frontend API client usage accordingly.
 

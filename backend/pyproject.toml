@@ -1,0 +1,20 @@
+[project]
+name = "kaucja-backend"
+version = "0.1.0"
+description = "Kaucja Boys universal wallet API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "bcrypt>=4.2",
+    "email-validator>=2.2",
+    "fastapi>=0.115",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "python-jose[cryptography]>=3.3",
+    "python-multipart>=0.0.9",
+    "sqlalchemy>=2.0",
+    "uvicorn>=0.32",
+]
+
+[tool.uv]
+package = false
