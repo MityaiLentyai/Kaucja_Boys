@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { TriangleAlert } from "lucide-react";
+import BackButton from "../../components/BackButton";
 
 const fields = [
   { id: "name", label: "Name", type: "text", placeholder: "Jan", autoComplete: "given-name" },
@@ -33,6 +34,10 @@ export default function RegisterPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0d070f] px-4 py-10 text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(120,60,110,0.45),transparent_60%),radial-gradient(ellipse_at_bottom_right,rgba(208,154,189,0.18),transparent_55%)]" />
+
+      <div className="absolute left-4 top-5 z-20 sm:left-6">
+        <BackButton href="/" />
+      </div>
 
       <div className="relative z-10 w-full max-w-md space-y-6 rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-[0_30px_80px_-20px_rgba(208,154,189,0.35)] backdrop-blur">
         <Link href="/" className="flex flex-col items-center gap-4">

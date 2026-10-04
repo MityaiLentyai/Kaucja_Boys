@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUp, MapPin, QrCode, Recycle, ScanBarcode } from "lucide-react";
 import { apiFetch } from "../../lib/api";
+import BackButton from "../../components/BackButton";
 import BatchCard from "../../components/BatchCard";
 import {
   consumeExpandId,
@@ -74,6 +75,7 @@ export default function DashboardPage() {
         <div className="relative z-10 mx-auto max-w-xl space-y-6 px-4 py-6">
           <header className="flex items-center justify-between border-b border-white/10 pb-4">
             <div className="flex items-center gap-3">
+              <BackButton href="/" />
               <Link href="/">
                 <Image
                   src="/kaucash-logo.jpg"

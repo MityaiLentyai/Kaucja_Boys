@@ -11,6 +11,7 @@ import {
   Truck,
   Wallet,
 } from "lucide-react";
+import BackButton from "../../components/BackButton";
 
 export const metadata: Metadata = {
   title: "How it works · KauCash",
@@ -70,16 +71,19 @@ export default function HowItWorksPage() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(120,60,110,0.45),transparent_60%),radial-gradient(ellipse_at_bottom_right,rgba(208,154,189,0.18),transparent_55%)]" />
 
       <header className="relative z-10 mx-auto flex w-full max-w-4xl items-center justify-between px-6 py-5">
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/kaucash-logo.jpg"
-            alt="KauCash cow logo"
-            width={40}
-            height={40}
-            className="rounded-full ring-2 ring-[#d09abd]/60"
-          />
-          <span className="font-display text-lg font-semibold">KauCash</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <BackButton href="/" />
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/kaucash-logo.jpg"
+              alt="KauCash cow logo"
+              width={40}
+              height={40}
+              className="rounded-full ring-2 ring-[#d09abd]/60"
+            />
+            <span className="font-display text-lg font-semibold">KauCash</span>
+          </Link>
+        </div>
         <nav className="flex items-center gap-3 text-sm">
           <Link href="/login" className="rounded-full px-4 py-2 text-white/80 hover:text-white">
             Sign in
