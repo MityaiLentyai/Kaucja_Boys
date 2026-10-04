@@ -263,10 +263,7 @@ export default function ScanItemPage() {
       const barcodes = items.map((i) => i.barcode);
       await apiFetch("/wallet/finish-session", {
         method: "POST",
-        body: JSON.stringify({
-          item_count: itemCount,
-          total_amount: totalValue,
-        }),
+        body: JSON.stringify({ barcodes }),
       });
 
       stopCameraHardware();
