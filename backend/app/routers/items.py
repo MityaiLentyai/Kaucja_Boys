@@ -7,7 +7,7 @@ router = APIRouter(prefix="/items", tags=["items"])
 
 # Known deposit-eligible database items
 KNOWN_ITEMS = {
-    "5900000000001": {"name": "Żywiec Zdrój 1.5L PET", "deposit": 0.50},
+    "5902448246222": {"name": "Strzal Energi 120ml", "deposit": 0.50},
     "5901234567890": {"name": "Żywiec Light Beer Bottle 0.5L", "deposit": 0.50},
     "5900001002003": {"name": "Coca-Cola Zero 0.33L Can", "deposit": 0.50},
     "5000112678062": {"name": "Coca-Cola Zero 0.33L Plastic Bottle", "deposit": 0.50},
