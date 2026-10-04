@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "../../lib/api";
 import { saveToken } from "../../lib/auth";
@@ -37,15 +39,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
-        <h2 className="text-3xl font-extrabold text-center text-gray-900">Sign in to KauCash</h2>
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0d070f] px-4 text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(120,60,110,0.45),transparent_60%),radial-gradient(ellipse_at_bottom_right,rgba(208,154,189,0.18),transparent_55%)]" />
+
+      <div className="relative z-10 w-full max-w-md space-y-8 rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-[0_30px_80px_-20px_rgba(208,154,189,0.35)] backdrop-blur">
+        <Link href="/" className="flex flex-col items-center gap-4">
+          <Image
+            src="/kaucash-logo.jpg"
+            alt="KauCash cow logo"
+            width={80}
+            height={80}
+            className="rounded-full ring-2 ring-[#d09abd]/60"
+          />
+          <h2 className="bg-gradient-to-r from-white via-[#f3d9ea] to-[#d09abd] bg-clip-text text-center font-display text-3xl font-semibold text-transparent">
+            Sign in to KauCash
+          </h2>
+        </Link>
+        {error && (
+          <p className="rounded-lg bg-red-500/10 px-3 py-2 text-center text-sm text-red-300 ring-1 ring-red-400/30">
+            {error}
+          </p>
+        )}
+        <form className="mt-8 space-y-4" onSubmit={handleLogin}>
           <input
             type="email"
             required
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30"
             placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -53,18 +72,19 @@ export default function LoginPage() {
           <input
             type="password"
             required
-            className="w-full px-3 py-2 border rounded-md"
+            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
             type="submit"
-            className="w-full py-2 px-4 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 font-semibold"
+            className="w-full rounded-full bg-[#d09abd] px-4 py-3 font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] hover:bg-[#e2b5d2]"
           >
             Sign In
           </button>
         </form>
+        <p className="text-center text-xs text-white/40">One wallet. Every store. Every time.</p>
       </div>
     </div>
   );
