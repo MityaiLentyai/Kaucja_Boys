@@ -39,7 +39,7 @@ export default function AppShell({
           <button
             onClick={handleBack}
             aria-label="Go back"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/70 transition hover:border-[#d09abd]/50 hover:text-white"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/70 transition hover:border-[#d09abd]/50 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f]"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
@@ -49,7 +49,10 @@ export default function AppShell({
             {subtitle && <p className="truncate text-sm text-white/50">{subtitle}</p>}
           </div>
 
-          <Link href="/" className="shrink-0">
+          <Link
+            href="/"
+            className="shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f]"
+          >
             <Image
               src="/kaucash-logo.jpg"
               alt="KauCash cow logo"

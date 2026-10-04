@@ -78,12 +78,15 @@ export default function Home() {
           <span className="font-display text-lg font-semibold">KauCash</span>
         </Link>
         <nav className="flex items-center gap-3 text-sm">
-          <Link href="/login" className="rounded-full px-4 py-2 text-white/80 hover:text-white">
+          <Link
+            href="/login"
+            className="rounded-full px-4 py-2 text-white/80 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f]"
+          >
             Sign in
           </Link>
           <Link
             href="/scan"
-            className="rounded-full bg-[#d09abd] px-4 py-2 font-semibold text-[#1a0d1a] hover:bg-[#e2b5d2]"
+            className="rounded-full bg-[#d09abd] px-4 py-2 font-semibold text-[#1a0d1a] hover:bg-[#e2b5d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f]"
           >
             Scan a receipt
           </Link>
@@ -92,7 +95,7 @@ export default function Home() {
 
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-1 flex-col px-6">
         <section className="pt-10 text-center">
-          <h1 className="bg-gradient-to-r from-white via-[#f3d9ea] to-[#d09abd] bg-clip-text font-display text-6xl font-semibold tracking-tight text-transparent sm:text-8xl">
+          <h1 className="bg-gradient-to-r from-white via-[#f3d9ea] to-[#d09abd] bg-clip-text font-display text-4xl font-semibold tracking-tight text-transparent sm:text-6xl lg:text-8xl">
             KauCash
           </h1>
           <p className="mt-4 text-xl text-white/80 sm:text-2xl">Kaucja that works everywhere.</p>
@@ -117,13 +120,13 @@ export default function Home() {
         <section className="mt-8 flex flex-wrap justify-center gap-4">
           <Link
             href="/login"
-            className="rounded-full bg-[#d09abd] px-8 py-3 text-base font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] hover:bg-[#e2b5d2]"
+            className="rounded-full bg-[#d09abd] px-8 py-3 text-base font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] hover:bg-[#e2b5d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f]"
           >
             Open my wallet
           </Link>
           <Link
             href="/scan"
-            className="rounded-full border border-white/20 px-8 py-3 text-base font-semibold text-white hover:bg-white/10"
+            className="rounded-full border border-white/20 px-8 py-3 text-base font-semibold text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f]"
           >
             Scan a receipt
           </Link>

@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "../../lib/api";
 import { saveToken } from "../../lib/auth";
 
 export default function LoginPage() {
@@ -56,30 +55,44 @@ export default function LoginPage() {
           </h2>
         </Link>
         {error && (
-          <p className="rounded-lg bg-red-500/10 px-3 py-2 text-center text-sm text-red-300 ring-1 ring-red-400/30">
+          <p
+            role="alert"
+            aria-live="assertive"
+            className="rounded-lg bg-red-500/10 px-3 py-2 text-center text-sm text-red-300 ring-1 ring-red-400/30"
+          >
             {error}
           </p>
         )}
         <form className="mt-8 space-y-4" onSubmit={handleLogin}>
+          <label htmlFor="email" className="block text-sm text-white/70">
+            Email address
+          </label>
           <input
+            id="email"
             type="email"
             required
             className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30"
             placeholder="Email address"
+            autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+          <label htmlFor="password" className="block text-sm text-white/70">
+            Password
+          </label>
           <input
+            id="password"
             type="password"
             required
             className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30"
             placeholder="Password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
             type="submit"
-            className="w-full rounded-full bg-[#d09abd] px-4 py-3 font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] hover:bg-[#e2b5d2]"
+            className="w-full rounded-full bg-[#d09abd] px-4 py-3 font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] hover:bg-[#e2b5d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f]"
           >
             Sign In
           </button>

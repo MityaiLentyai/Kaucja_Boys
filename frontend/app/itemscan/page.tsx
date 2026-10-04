@@ -24,6 +24,7 @@ export default function ScanItemPage() {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+  const scanCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isScanningRef = useRef(false);
   const itemsRef = useRef<ScannedItem[]>([]);
@@ -160,6 +161,9 @@ export default function ScanItemPage() {
     return () => {
       isMounted = false;
       stopCameraHardware();
+      if (scanCooldownTimerRef.current) {
+        clearTimeout(scanCooldownTimerRef.current);
+      }
       console.log = originalConsoleLog;
       console.warn = originalConsoleWarn;
       console.error = originalConsoleError;
@@ -247,7 +251,10 @@ export default function ScanItemPage() {
 
   const resetScanCooldown = () => {
     setLoading(false);
-    setTimeout(() => {
+    if (scanCooldownTimerRef.current) {
+      clearTimeout(scanCooldownTimerRef.current);
+    }
+    scanCooldownTimerRef.current = setTimeout(() => {
       isScanningRef.current = false;
     }, 1800);
   };
@@ -284,16 +291,37 @@ export default function ScanItemPage() {
   const itemCount = items.length;
   const totalValue = itemCount * 0.5;
 
+  useEffect(() => {
+    if (!warningModalMessage) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setWarningModalMessage(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [warningModalMessage]);
+
   return (
     <AppShell title="Scan Items" subtitle="Bottles and cans" onBack={handleBackNavigation}>
       {warningModalMessage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm space-y-4 rounded-3xl border border-white/10 bg-[#1a0f1c] p-6 text-center shadow-[0_30px_80px_-20px_rgba(208,154,189,0.45)]">
-            <h3 className="font-display text-lg font-semibold text-white">Warning</h3>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="warning-modal-title"
+            className="w-full max-w-sm space-y-4 rounded-3xl border border-white/10 bg-[#1a0f1c] p-6 text-center shadow-[0_30px_80px_-20px_rgba(208,154,189,0.45)]"
+          >
+            <h3 id="warning-modal-title" className="font-display text-lg font-semibold text-white">
+              Warning
+            </h3>
             <p className="text-sm font-semibold text-red-300">{warningModalMessage}</p>
             <button
+              autoFocus
               onClick={() => setWarningModalMessage(null)}
-              className="w-full rounded-full bg-[#d09abd] py-2.5 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2]"
+              className="w-full rounded-full bg-[#d09abd] py-2.5 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f]"
             >
               Acknowledge
             </button>
@@ -342,6 +370,8 @@ export default function ScanItemPage() {
 
       {feedback && (
         <div
+          role="alert"
+          aria-live="assertive"
           className={`rounded-2xl border p-3 text-center text-sm font-semibold ${
             feedback.type === "success"
               ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
@@ -368,7 +398,7 @@ export default function ScanItemPage() {
                   <p className="font-semibold text-white/90">{item.name}</p>
                   <p className="font-mono text-white/40">{item.barcode}</p>
                 </div>
-                <span className="font-bold text-emerald-300">+0.50 PLN</span>
+                <span className="font-bold text-emerald-300">+{item.value.toFixed(2)} PLN</span>
               </li>
             ))}
           </ul>
@@ -378,7 +408,7 @@ export default function ScanItemPage() {
       <button
         onClick={handleFinish}
         disabled={loading}
-        className="w-full rounded-full bg-[#d09abd] py-3 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2] disabled:opacity-50"
+        className="w-full rounded-full bg-[#d09abd] py-3 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f] disabled:opacity-50"
       >
         {loading ? "Processing..." : `Finish (${itemCount} items • ${totalValue.toFixed(2)} PLN)`}
       </button>

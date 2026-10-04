@@ -18,16 +18,21 @@ export default function DashboardPage() {
   const router = useRouter();
   const [wallet, setWallet] = useState<{ balance: number } | null>(null);
   const [user, setUser] = useState<{ full_name: string; email: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const userData = await apiFetch<{ full_name: string; email: string }>("/auth/me");
-        const walletData = await apiFetch<{ balance: number }>("/wallet");
+        const [userData, walletData] = await Promise.all([
+          apiFetch<{ full_name: string; email: string }>("/auth/me"),
+          apiFetch<{ balance: number }>("/wallet"),
+        ]);
         setUser(userData);
         setWallet(walletData);
       } catch {
         router.push("/login");
+      } finally {
+        setIsLoading(false);
       }
     }
     loadData();
@@ -37,9 +42,16 @@ export default function DashboardPage() {
     <div className="relative min-h-screen overflow-hidden bg-[#0d070f] text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(120,60,110,0.45),transparent_60%),radial-gradient(ellipse_at_bottom_right,rgba(208,154,189,0.18),transparent_55%)]" />
 
-      {!user || !wallet ? (
-        <div className="relative z-10 flex min-h-screen items-center justify-center text-white/60">
-          Loading...
+      {isLoading || !user || !wallet ? (
+        <div
+          className="relative z-10 flex min-h-screen items-center justify-center text-white/60"
+          role="status"
+          aria-live="polite"
+        >
+          <span className="inline-flex items-center gap-2">
+            <span className="h-2 w-2 animate-ping rounded-full bg-[#d09abd]" />
+            Loading dashboard...
+          </span>
         </div>
       ) : (
         <div className="relative z-10 mx-auto max-w-xl space-y-6 px-4 py-6">
@@ -74,17 +86,17 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {actions.map(({ href, label, text, icon: ActionIcon }) => (
-              <button
+              <Link
                 key={href}
-                onClick={() => router.push(href)}
-                className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:border-[#d09abd]/50 hover:bg-white/[0.08]"
+                href={href}
+                className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:border-[#d09abd]/50 hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f]"
               >
                 <ActionIcon className="h-6 w-6 text-[#d09abd]" />
                 <p className="mt-3 font-semibold">{label}</p>
                 <p className="text-xs text-white/50">{text}</p>
-              </button>
+              </Link>
             ))}
           </div>
 

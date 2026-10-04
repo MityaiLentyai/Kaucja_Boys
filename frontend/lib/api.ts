@@ -1,5 +1,3 @@
-const API_BASE_URL = "https://kaucja-boys.onrender.com";
-
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 

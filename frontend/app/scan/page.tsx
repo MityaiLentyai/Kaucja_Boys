@@ -21,6 +21,7 @@ export default function ScanVoucherPage() {
   const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const isSubmittingRef = useRef(false);
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [manualBarcode, setManualBarcode] = useState("");
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -135,6 +136,9 @@ export default function ScanVoucherPage() {
     return () => {
       isMounted = false;
       stopCameraHardware();
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current);
+      }
       console.error = originalConsoleErr;
       console.log = originalConsoleLog;
     };
@@ -159,7 +163,7 @@ export default function ScanVoucherPage() {
         message: `Success! Added +${res.amount.toFixed(2)} PLN from ${res.issuer_store}. New balance: ${res.new_balance.toFixed(2)} PLN`,
       });
 
-      setTimeout(() => {
+      redirectTimerRef.current = setTimeout(() => {
         router.push("/dashboard");
       }, 1500);
     } catch (err: any) {
@@ -207,6 +211,8 @@ export default function ScanVoucherPage() {
       {/* Feedback Banner */}
       {feedback && (
         <div
+          role="alert"
+          aria-live="assertive"
           className={`rounded-2xl border p-4 text-center text-sm font-semibold ${
             feedback.type === "success"
               ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
@@ -223,7 +229,11 @@ export default function ScanVoucherPage() {
           Manual Voucher Entry
         </h2>
         <div className="flex gap-2">
+          <label htmlFor="manual-barcode" className="sr-only">
+            Enter voucher barcode
+          </label>
           <input
+            id="manual-barcode"
             type="text"
             placeholder="e.g., KAUCJA-100"
             className="flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30"
@@ -233,7 +243,7 @@ export default function ScanVoucherPage() {
           <button
             onClick={() => handleVoucherSubmit(manualBarcode)}
             disabled={loading || !manualBarcode}
-            className="rounded-full bg-[#d09abd] px-5 py-2.5 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2] disabled:opacity-50"
+            className="rounded-full bg-[#d09abd] px-5 py-2.5 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f] disabled:opacity-50"
           >
             {loading ? "Submitting..." : "Claim"}
           </button>

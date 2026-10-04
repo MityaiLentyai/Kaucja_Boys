@@ -31,6 +31,9 @@ function project(latitude: number, longitude: number) {
 
 export default function ReturnPointsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const toggleSelection = (pointId: string) => {
+    setSelectedId((currentId) => (currentId === pointId ? null : pointId));
+  };
 
   return (
     <AppShell title="Return Points" subtitle={`Near ${demoUserLocation.label}`}>
@@ -56,7 +59,7 @@ export default function ReturnPointsPage() {
               key={point.id}
               onClick={() => setSelectedId(isSelected ? null : point.id)}
               aria-label={`${point.name}, ${formatDistance(point.distanceMeters)}`}
-              className="absolute -translate-x-1/2 -translate-y-full transition hover:scale-110"
+              className="absolute -translate-x-1/2 -translate-y-full transition hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f3d9ea] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f]"
               style={project(point.latitude, point.longitude)}
             >
               <span
@@ -84,13 +87,22 @@ export default function ReturnPointsPage() {
           const isSelected = selectedId === point.id;
 
           return (
-            <div
+            <article
               key={point.id}
-              onClick={() => setSelectedId(isSelected ? null : point.id)}
-              className={`cursor-pointer rounded-2xl border bg-white/[0.04] p-4 transition ${
-                isSelected
-                  ? "border-[#d09abd]/60 bg-white/[0.08]"
-                  : "border-white/10 hover:border-[#d09abd]/40"
+              onClick={() => toggleSelection(point.id)}
+              onKeyDown={(event) => {
+               if (event.key === "Enter" || event.key === " ") {
+                 event.preventDefault();
+                 toggleSelection(point.id);
+               }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-pressed={isSelected}
+              className={`cursor-pointer rounded-2xl border bg-white/[0.04] p-4 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d070f] ${
+               isSelected
+                 ? "border-[#d09abd]/60 bg-white/[0.08] focus-visible:ring-[#f3d9ea]"
+                 : "border-white/10 hover:border-[#d09abd]/40"
               }`}
             >
               <div className="flex items-start gap-3">
@@ -141,7 +153,7 @@ export default function ReturnPointsPage() {
                   </a>
                 </div>
               </div>
-            </div>
+            </article>
           );
         })}
       </div>
