@@ -21,9 +21,6 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "KauCash",
   description: "Kaucja that works everywhere.",
-  icons: {
-    icon: '/favicon.ico',
-  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

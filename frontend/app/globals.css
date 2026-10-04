@@ -126,6 +126,21 @@ body {
   .btn-secondary {
     animation: none;
   }
+
+  .batch-expand {
+    transition: none;
+  }
+}
+
+/* In-place expand for a return-batch card. Height animates via 0fr → 1fr. */
+.batch-expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms ease;
+}
+
+.batch-expand-open {
+  grid-template-rows: 1fr;
 }
 
 /* Leaflet map on the return points page */

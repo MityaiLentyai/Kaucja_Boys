@@ -6,6 +6,7 @@ import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from "@zxing/
 import AppShell from "@/components/AppShell";
 import Spinner from "@/components/Spinner";
 import { apiFetch } from "@/lib/api";
+import { addBatch, nowIso } from "@/lib/batches";
 
 interface ScanItemResponse {
   message: string;
@@ -19,6 +20,7 @@ interface ScannedItem {
   barcode: string;
   name: string;
   value: number;
+  scannedAt: string;
 }
 
 export default function ScanItemPage() {
@@ -228,6 +230,7 @@ export default function ScanItemPage() {
         barcode,
         name: res.item_name || "Deposit Item",
         value: res.deposit_value || 0.5,
+        scannedAt: nowIso(),
       };
 
       updateItems([newItem, ...itemsRef.current]);
@@ -267,6 +270,16 @@ export default function ScanItemPage() {
         method: "POST",
         body: JSON.stringify({ barcodes }),
       });
+
+      // Only record the batch once the wallet credit actually succeeded.
+      addBatch(
+        items.map((item) => ({
+          barcode: item.barcode,
+          name: item.name,
+          value: item.value,
+          scannedAt: item.scannedAt,
+        })),
+      );
 
       stopCameraHardware();
       router.push("/dashboard");

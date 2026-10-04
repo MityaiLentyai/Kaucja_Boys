@@ -6,6 +6,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowUp, MapPin, QrCode, Recycle, ScanBarcode } from "lucide-react";
 import { apiFetch } from "../../lib/api";
+import BatchCard from "../../components/BatchCard";
+import {
+  consumeExpandId,
+  loadBatches,
+  markBatchReturned,
+  nowMs,
+  resolveStatus,
+  type ReturnBatch,
+} from "../../lib/batches";
 
 const actions = [
   { href: "/scan", label: "Scan Voucher", text: "Add a deposit receipt", icon: ScanBarcode },
@@ -18,6 +27,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const [wallet, setWallet] = useState<{ balance: number } | null>(null);
   const [user, setUser] = useState<{ full_name: string; email: string } | null>(null);
+  const [batches, setBatches] = useState<ReturnBatch[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
     async function loadData() {
@@ -26,12 +38,29 @@ export default function DashboardPage() {
         const walletData = await apiFetch<{ balance: number }>("/wallet");
         setUser(userData);
         setWallet(walletData);
+        // Read the clock and the stored batches only once authenticated, so the
+        // per-account storage key is resolvable.
+        setNow(nowMs());
+        const loaded = loadBatches();
+        setBatches(loaded);
+        const queued = consumeExpandId();
+        if (queued && loaded.some((batch) => batch.id === queued)) {
+          setExpandedId(queued);
+        }
       } catch {
         router.push("/login");
       }
     }
     loadData();
+
+    // Keeps the countdown honest and flips a batch to "expired" without a reload.
+    const ticker = setInterval(() => setNow(nowMs()), 60_000);
+    return () => clearInterval(ticker);
   }, [router]);
+
+  const handleMarkReturned = (id: string) => {
+    setBatches(markBatchReturned(id));
+  };
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0d070f] text-white">
@@ -73,6 +102,25 @@ export default function DashboardPage() {
               <ArrowUp className="h-3 w-3" /> Available
             </span>
           </div>
+
+          {batches.length > 0 && (
+            <section className="space-y-3">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                Return batches
+              </h2>
+              {batches.map((batch) => (
+                <BatchCard
+                  key={batch.id}
+                  batch={batch}
+                  status={resolveStatus(batch, now)}
+                  now={now}
+                  expanded={expandedId === batch.id}
+                  onToggle={() => setExpandedId(expandedId === batch.id ? null : batch.id)}
+                  onMarkReturned={() => handleMarkReturned(batch.id)}
+                />
+              ))}
+            </section>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             {actions.map(({ href, label, text, icon: ActionIcon }) => (

@@ -78,10 +78,10 @@ export default function Home() {
           <span className="font-display text-lg font-semibold">KauCash</span>
         </Link>
         <nav className="flex items-center gap-3 text-sm">
-          <Link href="/login" className="rounded-full px-4 py-2 text-white hover:text-white">
+          <Link href="/login" className="rounded-full px-4 py-2 text-white/80 hover:text-white">
             Sign in
           </Link>
-          <Link href="/register" className="btn btn-primary px-4 py-2">
+          <Link href="/register" className="btn btn-outline px-4 py-2">
             Register
           </Link>
         </nav>
