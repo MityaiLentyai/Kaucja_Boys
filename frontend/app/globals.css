@@ -25,3 +25,98 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
+
+/* Leaflet map on the return points page */
+.leaflet-container {
+  background: #140b17;
+  font-family: inherit;
+}
+
+/* OpenStreetMap ships light tiles only, so recolour them into a dark basemap.
+   Markers and tooltips live in other panes and stay untouched. */
+.leaflet-tile-pane {
+  filter: invert(1) hue-rotate(185deg) brightness(0.92) contrast(0.92) saturate(0.7);
+}
+
+.leaflet-control-attribution {
+  background: rgba(20, 11, 23, 0.8) !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-size: 9px;
+}
+
+.leaflet-control-attribution a {
+  color: rgba(208, 154, 189, 0.8) !important;
+}
+
+.leaflet-control-zoom a {
+  background: rgba(20, 11, 23, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  color: #fff !important;
+}
+
+/* leaflet.css is injected after globals.css, so these need the extra specificity. */
+.leaflet-container .leaflet-tooltip {
+  background: rgba(20, 11, 23, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+}
+
+.leaflet-container .leaflet-tooltip::before {
+  display: none;
+}
+
+.kaucash-pin {
+  background: #fff;
+  border-radius: 9999px;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.35),
+    0 6px 16px rgba(0, 0, 0, 0.55);
+  transition:
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.kaucash-pin:hover {
+  transform: scale(1.1);
+}
+
+.kaucash-pin-selected {
+  box-shadow:
+    0 0 0 3px #d09abd,
+    0 0 22px rgba(208, 154, 189, 0.75);
+}
+
+.kaucash-you-dot {
+  position: absolute;
+  inset: 3px;
+  border-radius: 9999px;
+  background: #d09abd;
+  box-shadow:
+    0 0 0 3px rgba(208, 154, 189, 0.35),
+    0 0 14px rgba(208, 154, 189, 0.9);
+}
+
+.kaucash-you-ring {
+  position: absolute;
+  inset: -7px;
+  border-radius: 9999px;
+  background: rgba(208, 154, 189, 0.3);
+  animation: kaucash-ping 1.9s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes kaucash-ping {
+  75%,
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}

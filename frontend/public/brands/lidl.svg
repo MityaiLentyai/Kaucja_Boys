@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="50" fill="#E60A14" />
+  <circle cx="50" cy="50" r="44" fill="#FFF000" />
+
+  <!-- red diamond sitting behind the wordmark, doubling as the dot of the "i" -->
+  <rect x="31.5" y="31.5" width="25" height="25" transform="rotate(45 44 44)" fill="#E60A14" />
+
+  <g fill="#0050AA">
+    <path d="M14 34h8v24h8v8H14z" />
+    <path d="M33 42h8v24h-8z" />
+    <path d="M44 34h10a16 16 0 0 1 0 32H44zm8 8v16a8 8 0 0 0 0-16z" fill-rule="evenodd" />
+    <path d="M69 34h8v24h8v8H69z" />
+  </g>
+</svg>
