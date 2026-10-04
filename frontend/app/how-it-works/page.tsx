@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Bot,
-  Coins,
+  Clock,
   MapPin,
   QrCode,
+  Recycle,
   ScanBarcode,
   ScanLine,
-  ShieldCheck,
   Truck,
   Wallet,
 } from "lucide-react";
@@ -16,58 +15,43 @@ import {
 export const metadata: Metadata = {
   title: "How it works · KauCash",
   description:
-    "Turn store-specific kaucja slips into one balance you can spend at any participating checkout.",
+    "Scan slips or bottles, keep one wallet, pay with QR, and find a working return point.",
 };
 
-const problems = [
-  "Your deposit is locked to the chain that printed the slip.",
-  "The value sits on paper that is easy to lose and quick to expire.",
-  "Finding a machine that actually works is guesswork.",
-];
-
-const steps = [
+const features = [
   {
     icon: ScanBarcode,
-    title: "Scan the slip",
-    text: "Point your camera at the barcode on a deposit receipt from Biedronka, Lidl or Żabka. No camera? Type the code by hand.",
+    title: "Scan a slip",
+    text: "Camera or type the code. A Biedronka, Lidl, or Żabka voucher is claimed once and added to your wallet.",
+  },
+  {
+    icon: Recycle,
+    title: "Scan bottles at home",
+    text: "Scan bottles and cans. The deposit is credited now and grouped into a return batch.",
+  },
+  {
+    icon: Clock,
+    title: "Return in 48 hours",
+    text: "Each batch stays pending until you take the bottles back — or it expires. Mark it returned from the dashboard.",
   },
   {
     icon: Wallet,
-    title: "One balance, not a pile of coupons",
-    text: "Every voucher you scan lands in the same wallet in PLN, whichever chain issued it.",
+    title: "One wallet",
+    text: "Slips and home scans land in the same PLN balance, whichever store issued the deposit.",
   },
   {
     icon: QrCode,
-    title: "Pay with a QR code",
-    text: "At a participating checkout, show your code. The cashier scans it, enters the amount, and it leaves your balance.",
+    title: "Pay with QR",
+    text: "Show a one-time code at a participating checkout. Copy it or generate a new one.",
   },
   {
-    icon: Coins,
-    title: "Collect points as you return",
-    text: "Every deposit earns points that turn into sponsored vouchers and partner discounts.",
+    icon: MapPin,
+    title: "Find a machine that works",
+    text: "Nearby return points with status, what they accept, and directions.",
   },
-];
-
-const mapFacts = [
-  "Nearby return points, ranked by how far you have to walk.",
-  "Community status at a glance: working, long queue, or out of order.",
-  "What each point accepts — bottles, cans, glass.",
-  "Report what you found, so the next person doesn't waste the trip.",
-];
-
-const trustFacts = [
-  "A voucher code can be claimed exactly once.",
-  "Payment codes are single-use and tied to your account.",
-  "Top-ups and payments are written to an append-only ledger.",
-  "Raw scans are kept, so a disputed claim can always be audited.",
 ];
 
 const roadmap = [
-  {
-    icon: Bot,
-    title: "Scan bottles at home",
-    text: "AI estimates the deposit and credits you up front; you settle it when the bottles physically go back.",
-  },
   {
     icon: ScanLine,
     title: "Your QR at the machine",
@@ -79,15 +63,6 @@ const roadmap = [
     text: "Hand off a bulk return and receive the deposit minus a collection fee.",
   },
 ];
-
-function Bullet({ children }: { children: React.ReactNode }) {
-  return (
-    <li className="flex gap-2.5 text-sm text-white/60">
-      <span className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-full bg-[#d09abd]" />
-      <span>{children}</span>
-    </li>
-  );
-}
 
 export default function HowItWorksPage() {
   return (
@@ -121,57 +96,25 @@ export default function HowItWorksPage() {
             How KauCash works
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-white/70">
-            Paper deposit slips in. One balance out, spendable at any participating checkout.
+            Scan slips or bottles. One balance. Spend it anywhere that takes KauCash.
           </p>
         </section>
 
-        <section className="mt-12 rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-          <h2 className="font-display text-xl font-semibold">Why it needs fixing</h2>
-          <ul className="mt-4 space-y-2.5">
-            {problems.map((problem) => (
-              <Bullet key={problem}>{problem}</Bullet>
-            ))}
-          </ul>
-        </section>
-
         <section className="mt-12">
-          <h2 className="font-display text-xl font-semibold">Four steps, start to finish</h2>
-          <ol className="mt-5 grid gap-4 sm:grid-cols-2">
-            {steps.map(({ icon: StepIcon, title, text }, index) => (
+          <ol className="grid gap-4 sm:grid-cols-2">
+            {features.map(({ icon: FeatureIcon, title, text }, index) => (
               <li key={title} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
                 <div className="flex items-center justify-between gap-3">
-                  <StepIcon className="h-6 w-6 text-[#d09abd]" />
+                  <FeatureIcon className="h-6 w-6 text-[#d09abd]" />
                   <span className="flex h-7 w-7 items-center justify-center rounded-full border border-[#d09abd]/30 bg-[#d09abd]/10 font-display text-xs font-semibold text-[#d09abd]">
                     {index + 1}
                   </span>
                 </div>
-                <h3 className="mt-3 font-semibold">{title}</h3>
+                <h2 className="mt-3 font-semibold">{title}</h2>
                 <p className="mt-1.5 text-sm text-white/60">{text}</p>
               </li>
             ))}
           </ol>
-        </section>
-
-        <section className="mt-12 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-            <MapPin className="h-6 w-6 text-[#d09abd]" />
-            <h2 className="mt-3 font-display text-lg font-semibold">Find a machine that works</h2>
-            <ul className="mt-4 space-y-2.5">
-              {mapFacts.map((fact) => (
-                <Bullet key={fact}>{fact}</Bullet>
-              ))}
-            </ul>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-            <ShieldCheck className="h-6 w-6 text-[#d09abd]" />
-            <h2 className="mt-3 font-display text-lg font-semibold">Built to be trusted</h2>
-            <ul className="mt-4 space-y-2.5">
-              {trustFacts.map((fact) => (
-                <Bullet key={fact}>{fact}</Bullet>
-              ))}
-            </ul>
-          </div>
         </section>
 
         <section className="mt-12">
@@ -181,7 +124,7 @@ export default function HowItWorksPage() {
               In design
             </span>
           </div>
-          <div className="mt-5 grid gap-4 sm:grid-cols-3">
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {roadmap.map(({ icon: RoadmapIcon, title, text }) => (
               <div
                 key={title}
@@ -196,8 +139,7 @@ export default function HowItWorksPage() {
         </section>
 
         <section className="mt-14 text-center">
-          <h2 className="font-display text-2xl font-semibold">Ready to stop collecting paper?</h2>
-          <div className="mt-6 flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-center gap-4">
             <Link href="/login" className="btn btn-primary px-8 py-3 text-base">
               Open my wallet
             </Link>
@@ -205,11 +147,6 @@ export default function HowItWorksPage() {
               See return points
             </Link>
           </div>
-          <p className="mx-auto mt-8 max-w-2xl text-xs text-white/40">
-            KauCash is a universal wallet layer on top of today&apos;s store-specific deposit
-            vouchers. Checkout redemption runs as a participating-merchant concept and machine status
-            is crowdsourced.
-          </p>
         </section>
       </main>
 
