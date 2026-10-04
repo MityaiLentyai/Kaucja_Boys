@@ -16,7 +16,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://10.250.165.75:3000",
-        "https://kaucash.netlify.app"
+        "https://kaucja-boys.vercel.app/"
     ],
     allow_credentials=True,
     allow_methods=["*"],
