@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from "@zxing/library";
 import AppShell from "@/components/AppShell";
+import Spinner from "@/components/Spinner";
 import { apiFetch } from "@/lib/api";
 
 interface ScanItemResponse {
@@ -283,6 +284,9 @@ export default function ScanItemPage() {
 
   const itemCount = items.length;
   const totalValue = itemCount * 0.5;
+  // `items` only ever receives entries the server marked `is_valid`, so a
+  // non-empty session is the signal that there is something worth finishing.
+  const canFinish = !loading && itemCount > 0;
 
   return (
     <AppShell title="Scan Items" subtitle="Bottles and cans" onBack={handleBackNavigation}>
@@ -377,10 +381,21 @@ export default function ScanItemPage() {
 
       <button
         onClick={handleFinish}
-        disabled={loading}
-        className="w-full rounded-full bg-[#d09abd] py-3 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2] disabled:opacity-50"
+        disabled={!canFinish}
+        aria-busy={loading}
+        title={canFinish ? undefined : "Scan at least one item to finish the session"}
+        className="btn btn-primary w-full py-3 text-sm"
       >
-        {loading ? "Processing..." : `Finish (${itemCount} items • ${totalValue.toFixed(2)} PLN)`}
+        {loading ? (
+          <>
+            <Spinner />
+            Processing…
+          </>
+        ) : itemCount === 0 ? (
+          "Scan an item to continue"
+        ) : (
+          `Finish (${itemCount} ${itemCount === 1 ? "item" : "items"} • ${totalValue.toFixed(2)} PLN)`
+        )}
       </button>
     </AppShell>
   );

@@ -4,7 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from "@zxing/library";
 import AppShell from "@/components/AppShell";
+import Spinner from "@/components/Spinner";
 import { apiFetch } from "@/lib/api";
+
+// Voucher validity is decided by the server (it is a database lookup), so the
+// client only gates on a code being plausible enough to be worth submitting.
+const MIN_BARCODE_LENGTH = 4;
 
 interface ScanResponse {
   message: string;
@@ -141,7 +146,8 @@ export default function ScanVoucherPage() {
   }, []);
 
   const handleVoucherSubmit = async (barcodeToSubmit: string) => {
-    if (!barcodeToSubmit.trim() || loading) return;
+    const barcode = barcodeToSubmit.trim();
+    if (barcode.length < MIN_BARCODE_LENGTH || loading) return;
 
     setLoading(true);
     setFeedback(null);
@@ -149,7 +155,7 @@ export default function ScanVoucherPage() {
     try {
       const res = await apiFetch<ScanResponse>("/vouchers/scan", {
         method: "POST",
-        body: JSON.stringify({ barcode: barcodeToSubmit }),
+        body: JSON.stringify({ barcode }),
       });
 
       stopCameraHardware();
@@ -159,6 +165,8 @@ export default function ScanVoucherPage() {
         message: `Success! Added +${res.amount.toFixed(2)} PLN from ${res.issuer_store}. New balance: ${res.new_balance.toFixed(2)} PLN`,
       });
 
+      // Stay in the loading state so the claim cannot be fired twice while the
+      // success banner is up and the redirect is pending.
       setTimeout(() => {
         router.push("/dashboard");
       }, 1500);
@@ -168,7 +176,6 @@ export default function ScanVoucherPage() {
         type: "error",
         message: err.message || "Failed to process voucher.",
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -177,6 +184,9 @@ export default function ScanVoucherPage() {
     stopCameraHardware();
     router.push("/dashboard");
   };
+
+  const trimmedBarcode = manualBarcode.trim();
+  const canClaim = !loading && trimmedBarcode.length >= MIN_BARCODE_LENGTH;
 
   return (
     <AppShell title="Scan Voucher" subtitle="Add a deposit receipt" onBack={handleBackNavigation}>
@@ -226,16 +236,26 @@ export default function ScanVoucherPage() {
           <input
             type="text"
             placeholder="e.g., KAUCJA-100"
-            className="flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30"
+            disabled={loading}
+            className="flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30 disabled:cursor-not-allowed disabled:opacity-60"
             value={manualBarcode}
             onChange={(e) => setManualBarcode(e.target.value)}
           />
           <button
-            onClick={() => handleVoucherSubmit(manualBarcode)}
-            disabled={loading || !manualBarcode}
-            className="rounded-full bg-[#d09abd] px-5 py-2.5 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2] disabled:opacity-50"
+            onClick={() => handleVoucherSubmit(trimmedBarcode)}
+            disabled={!canClaim}
+            aria-busy={loading}
+            title={canClaim ? undefined : "Enter a voucher code to claim it"}
+            className="btn btn-primary px-5 py-2.5 text-sm"
           >
-            {loading ? "Submitting..." : "Claim"}
+            {loading ? (
+              <>
+                <Spinner className="h-3.5 w-3.5" />
+                Claiming…
+              </>
+            ) : (
+              "Claim"
+            )}
           </button>
         </div>
         <p className="text-xs text-white/40">

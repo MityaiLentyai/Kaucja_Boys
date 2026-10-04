@@ -5,16 +5,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { saveToken } from "../../lib/auth";
+import Spinner from "../../components/Spinner";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("demo@kaucja.pl");
   const [password, setPassword] = useState("password123");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
     setError("");
+    setLoading(true);
 
     const formData = new URLSearchParams();
     formData.append("username", email);
@@ -31,9 +36,12 @@ export default function LoginPage() {
 
       const data = await res.json();
       saveToken(data.access_token);
+      // Stay in the loading state so the button cannot be fired again
+      // while the route transition to /dashboard is in flight.
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
+      setLoading(false);
     }
   };
 
@@ -63,7 +71,8 @@ export default function LoginPage() {
           <input
             type="email"
             required
-            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30"
+            disabled={loading}
+            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30 disabled:cursor-not-allowed disabled:opacity-60"
             placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -71,7 +80,8 @@ export default function LoginPage() {
           <input
             type="password"
             required
-            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30"
+            disabled={loading}
+            className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-white placeholder:text-white/40 outline-none focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30 disabled:cursor-not-allowed disabled:opacity-60"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -86,8 +96,20 @@ export default function LoginPage() {
               Forgot password?
             </button>
           </div>
-          <button type="submit" className="btn btn-primary w-full px-4 py-3">
-            Sign In
+          <button
+            type="submit"
+            disabled={loading}
+            aria-busy={loading}
+            className="btn btn-primary w-full px-4 py-3"
+          >
+            {loading ? (
+              <>
+                <Spinner />
+                Signing in…
+              </>
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
         <p className="text-center text-sm text-white/50">
