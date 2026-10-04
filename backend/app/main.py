@@ -13,7 +13,11 @@ app = FastAPI(title="Kaucja Boys Universal Wallet API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://10.250.165.75:3000",
+        "https://kaucash.netlify.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
