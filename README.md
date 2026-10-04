@@ -1,4 +1,4 @@
-# KauCash
+# KauCash 🐮
 
 **Kaucja that works everywhere.**
 
@@ -25,10 +25,10 @@ Accounts, balances, voucher claims, and item credits are persisted. Claims and r
 
 ## Try it
 
-| | |
-| --- | --- |
-| App | [kaucja-boys.vercel.app](https://kaucja-boys.vercel.app) |
-| Demo login | `demo@kaucja.pl` / `password123` |
+|            |                                                                        |
+| ---------- | ---------------------------------------------------------------------- |
+| App        | [kaucja-boys.vercel.app](https://kaucja-boys.vercel.app)               |
+| Demo login | `demo@kaucja.pl` / `password123`                                       |
 | Demo slips | `KAUCJA-100` (10 PLN) · `KAUCJA-050` (5 PLN) · `KAUCJA-025` (2.50 PLN) |
 
 Register a new account, or use the demo user. After sign-in the dashboard shows the wallet, return batches, and the four actions above.
@@ -41,17 +41,17 @@ Register a new account, or use the demo user. After sign-in the dashboard shows 
 Next.js (App Router)  →  FastAPI + JWT  →  SQLite / Postgres
 ```
 
-| Surface | What it does |
-| --- | --- |
-| Landing & how-it-works | Product story and the four-step flow |
-| Auth | Register, login, JWT session |
-| Wallet | Single PLN balance and return-batch cards |
-| `/scan` | Barcode / QR voucher claim → wallet top-up |
-| `/itemscan` | Bottle & can session → batch credit |
-| `/pay` | One-time payment QR for the cashier |
-| `/returnpoints` | Map of nearby machines and community status |
+| Surface                | What it does                                |
+| ---------------------- | ------------------------------------------- |
+| Landing & how-it-works | Product story and the four-step flow        |
+| Auth                   | Register, login, JWT session                |
+| Wallet                 | Single PLN balance and return-batch cards   |
+| `/scan`                | Barcode / QR voucher claim → wallet top-up  |
+| `/itemscan`            | Bottle & can session → batch credit         |
+| `/pay`                 | One-time payment QR for the cashier         |
+| `/returnpoints`        | Map of nearby machines and community status |
 
-Frontend: Next.js, React, Tailwind, ZXing (camera scan), Leaflet (map).  
+Frontend: Next.js, React, Tailwind, ZXing (camera scan), Leaflet (map).
 Backend: FastAPI, SQLAlchemy, JWT. Vouchers are single-use; item barcodes and wallet moves are written to an append-only ledger.
 
 ---
