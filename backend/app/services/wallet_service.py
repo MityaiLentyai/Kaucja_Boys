@@ -1,7 +1,8 @@
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
-from app.db.models import Wallet, WalletTransaction, TransactionType
-from app.services.barcode_validation import is_valid_barcode, normalize_barcode
+# from sqlalchemy.orm import Session
+# from fastapi import HTTPException, status
+# from app.db.models import Wallet, WalletTransaction, TransactionType
+# from app.services.barcode_validation import is_valid_barcode, normalize_barcode
+from app.services.barcode_validation import normalize_barcode
 
 def get_or_create_wallet(db: Session, user_id: str | int) -> Wallet:
     str_user_id = str(user_id)
@@ -49,19 +50,70 @@ def record_transaction(
 
     return tx
 
-    normalized_barcodes = [normalize_barcode(barcode) for barcode in barcodes]
-
-    if any(not is_valid_barcode(barcode) for barcode in normalized_barcodes):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Batch contains an invalid barcode."
-        )
-
 def credit_wallet_from_batch(
     db: Session,
     user_id: str | int,
-    barcodes: list[str]
+    barcodes: list[str],
 ) -> tuple[float, float]:
+    if not barcodes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Batch contains no items to scan.",
+        )
+
+    str_user_id = str(user_id)
+
+    # Normalize the scanned values before checking duplicates or saving them.
+    normalized_barcodes = [
+        normalize_barcode(barcode)
+        for barcode in barcodes
+        if barcode and normalize_barcode(barcode)
+    ]
+
+    if not normalized_barcodes:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Batch contains no valid barcodes.",
+        )
+
+    # Preserve duplicate protection across previous sessions.
+    existing_tx = (
+        db.query(WalletTransaction)
+        .filter(WalletTransaction.source_id.in_(normalized_barcodes))
+        .first()
+    )
+
+    if existing_tx:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Item {existing_tx.source_id} has already been recycled.",
+        )
+
+    total_amount = len(normalized_barcodes) * 0.50
+
+    for barcode in normalized_barcodes:
+        record_transaction(
+            db=db,
+            user_id=str_user_id,
+            amount=0.50,
+            type_=TransactionType.TOPUP,
+            source_type="item_recycling",
+            source_id=barcode,
+            description=f"Recycled item {barcode}",
+            commit=False,
+        )
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to finalize recycling batch. Transaction rolled back.",
+        )
+
+    wallet = get_or_create_wallet(db, str_user_id)
+    return total_amount, wallet.balance
     if not barcodes:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
