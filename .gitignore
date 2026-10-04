@@ -10,3 +10,6 @@ dist/
 *.pyo
 *.pyd
 *.db
+.neon
+.env.local
+node_modules/
