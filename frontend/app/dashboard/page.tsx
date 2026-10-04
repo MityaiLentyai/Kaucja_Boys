@@ -19,8 +19,8 @@ import {
 
 const actions = [
   { href: "/scan", label: "Scan Voucher", text: "Add a deposit receipt", icon: ScanBarcode },
-  { href: "/pay", label: "Pay with QR", text: "Spend at any store", icon: QrCode },
   { href: "/itemscan", label: "Scan Items", text: "Bottles and cans", icon: Recycle },
+  { href: "/pay", label: "Pay with QR", text: "Spend at any store", icon: QrCode },
   { href: "/returnpoints", label: "Return Points", text: "Machines near you", icon: MapPin },
 ];
 
@@ -138,7 +138,9 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          <p className="pt-4 text-center text-xs text-white/40">One wallet. Every store. Every time.</p>
+          <p className="pt-4 text-center text-xs text-white/40">
+            One wallet. Every store. Every time.
+          </p>
         </div>
       )}
     </div>

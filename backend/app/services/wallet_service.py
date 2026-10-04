@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.db.models import Wallet, WalletTransaction, TransactionType
+from app.services.barcode_validation import is_valid_barcode, normalize_barcode
 
 def get_or_create_wallet(db: Session, user_id: str | int) -> Wallet:
     str_user_id = str(user_id)
@@ -48,6 +49,14 @@ def record_transaction(
 
     return tx
 
+    normalized_barcodes = [normalize_barcode(barcode) for barcode in barcodes]
+
+    if any(not is_valid_barcode(barcode) for barcode in normalized_barcodes):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Batch contains an invalid barcode."
+        )
+
 def credit_wallet_from_batch(
     db: Session,
     user_id: str | int,
@@ -62,8 +71,8 @@ def credit_wallet_from_batch(
     str_user_id = str(user_id)
 
     existing_tx = db.query(WalletTransaction).filter(
-        WalletTransaction.source_id.in_(barcodes)
-    ).first()
+        WalletTransaction.source_id.in_(normalized_barcodes)
+     ).first()
 
     if existing_tx:
         raise HTTPException(
@@ -71,9 +80,9 @@ def credit_wallet_from_batch(
             detail=f"Item {existing_tx.source_id} has already been recycled."
         )
 
-    total_amount = len(barcodes) * 0.50
+    total_amount = len(normalized_barcodes) * 0.50
 
-    for barcode in barcodes:
+    for barcode in normalized_barcodes:
         record_transaction(
             db=db,
             user_id=str_user_id,
