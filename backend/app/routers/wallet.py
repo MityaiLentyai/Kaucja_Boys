@@ -36,8 +36,7 @@ def finish_scan_session(
     credited, new_balance = credit_wallet_from_batch(
         db=db,
         user_id=current_user.id,
-        item_count=payload.item_count,
-        total_amount=payload.total_amount,
+        barcodes=payload.barcodes,
     )
 
     return FinishScanSessionResponse(

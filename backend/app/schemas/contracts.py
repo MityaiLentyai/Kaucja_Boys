@@ -22,8 +22,7 @@ class UserLogin(BaseModel):
     password: str
 
 class FinishScanSessionRequest(BaseModel):
-    item_count: int
-    total_amount: float
+    barcodes: list[str]
 
 class FinishScanSessionResponse(BaseModel):
     message: str

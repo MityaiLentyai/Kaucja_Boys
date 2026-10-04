@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 from app.schemas.contracts import ItemScanRequest, ItemScanResponse
-from app.routers.auth import get_current_user  # adjust import according to your auth dependency
-from app.db.models import User
+from app.routers.auth import get_current_user
+from app.db.models import User, WalletTransaction
+from app.db.session import get_db
 
 router = APIRouter(prefix="/items", tags=["items"])
 
-# Known deposit-eligible database items
 KNOWN_ITEMS = {
     "5902448246222": {"name": "Strzal Energi 120ml", "deposit": 0.50},
     "5901234567890": {"name": "Żywiec Light Beer Bottle 0.5L", "deposit": 0.50},
@@ -16,7 +17,8 @@ KNOWN_ITEMS = {
 @router.post("/scan", response_model=ItemScanResponse)
 def scan_item(
     payload: ItemScanRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     code = payload.barcode.strip()
 
@@ -26,7 +28,17 @@ def scan_item(
             detail="Barcode cannot be empty."
         )
 
-    # 1. Simulate shape/deformation check (barcodes ending in '999' or 'BAD' represent damaged items)
+    existing_tx = db.query(WalletTransaction).filter(
+        WalletTransaction.source_id == code
+    ).first()
+
+    if existing_tx:
+        return ItemScanResponse(
+            is_valid=False,
+            deposit_value=0.0,
+            message="This item has already been recycled."
+        )
+
     if code.endswith("999") or code.endswith("BAD"):
         return ItemScanResponse(
             is_valid=False,
@@ -34,7 +46,6 @@ def scan_item(
             message="Item rejected: Container shape is deformed or barcode is damaged."
         )
 
-    # 2. Match against known catalog or general Polish EAN deposit format (starts with '590' or 'KAUCJA')
     if code in KNOWN_ITEMS:
         item = KNOWN_ITEMS[code]
         return ItemScanResponse(
