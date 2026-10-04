@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from "@zxing/library";
+import AppShell from "@/components/AppShell";
 import { apiFetch } from "@/lib/api";
 
 interface ScanResponse {
@@ -178,26 +179,15 @@ export default function ScanVoucherPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 max-w-md mx-auto flex flex-col space-y-6">
-      <header className="flex items-center justify-between border-b pb-3">
-        <button
-          onClick={handleBackNavigation}
-          className="text-sm font-semibold text-gray-600 hover:text-gray-900"
-        >
-          ← Back
-        </button>
-        <h1 className="text-lg font-bold text-gray-800">Scan Kaucja Voucher</h1>
-        <div className="w-8" />
-      </header>
-
+    <AppShell title="Scan Voucher" subtitle="Add a deposit receipt" onBack={handleBackNavigation}>
       {/* Camera Viewfinder */}
-      <div className="relative w-full aspect-square bg-black rounded-2xl overflow-hidden shadow-inner flex items-center justify-center">
-        <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+      <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-black">
+        <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
 
         {/* Scanner Target Frame in Theme Color rgb(208, 154, 189) */}
-        <div className="absolute inset-0 border-2 border-transparent flex items-center justify-center pointer-events-none">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div
-            className="w-3/4 h-36 rounded-xl border-4 border-dashed relative animate-pulse"
+            className="relative h-36 w-3/4 animate-pulse rounded-xl border-4 border-dashed"
             style={{ borderColor: "rgb(208, 154, 189)" }}
           >
             <div
@@ -208,7 +198,7 @@ export default function ScanVoucherPage() {
         </div>
 
         {cameraError && (
-          <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-6 text-center text-sm text-gray-200">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80 p-6 text-center text-sm text-white/70">
             {cameraError}
           </div>
         )}
@@ -217,10 +207,10 @@ export default function ScanVoucherPage() {
       {/* Feedback Banner */}
       {feedback && (
         <div
-          className={`p-4 rounded-xl text-sm font-semibold text-center ${
+          className={`rounded-2xl border p-4 text-center text-sm font-semibold ${
             feedback.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-              : "bg-red-50 text-red-700 border border-red-200"
+              ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+              : "border-red-400/30 bg-red-400/10 text-red-300"
           }`}
         >
           {feedback.message}
@@ -228,30 +218,33 @@ export default function ScanVoucherPage() {
       )}
 
       {/* Manual Input Fallback */}
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 space-y-4">
-        <h2 className="text-sm font-semibold text-gray-700">Manual Voucher Entry</h2>
-        <div className="flex space-x-2">
+      <div className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
+          Manual Voucher Entry
+        </h2>
+        <div className="flex gap-2">
           <input
             type="text"
             placeholder="e.g., KAUCJA-100"
-            className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2"
+            className="flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30"
             value={manualBarcode}
             onChange={(e) => setManualBarcode(e.target.value)}
           />
           <button
             onClick={() => handleVoucherSubmit(manualBarcode)}
             disabled={loading || !manualBarcode}
-            className="px-4 py-2 text-white font-semibold text-sm rounded-lg shadow transition-opacity disabled:opacity-50"
-            style={{ backgroundColor: "rgb(208, 154, 189)" }}
+            className="rounded-full bg-[#d09abd] px-5 py-2.5 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2] disabled:opacity-50"
           >
             {loading ? "Submitting..." : "Claim"}
           </button>
         </div>
-        <p className="text-xs text-gray-400">
-          Demo codes available: <code className="bg-gray-100 px-1 py-0.5 rounded">KAUCJA-100</code>{" "}
-          (10 PLN), <code className="bg-gray-100 px-1 py-0.5 rounded">KAUCJA-050</code> (5 PLN).
+        <p className="text-xs text-white/40">
+          Demo codes available:{" "}
+          <code className="rounded bg-white/10 px-1.5 py-0.5 text-white/70">KAUCJA-100</code> (10
+          PLN), <code className="rounded bg-white/10 px-1.5 py-0.5 text-white/70">KAUCJA-050</code>{" "}
+          (5 PLN).
         </p>
       </div>
-    </div>
+    </AppShell>
   );
 }

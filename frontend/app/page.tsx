@@ -21,7 +21,7 @@ const features = [
   },
   {
     icon: MapPin,
-    title: "Find machines",
+    title: "Find return points",
     text: "See nearby deposit machines and whether they actually work.",
   },
 ];

@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowUp, QrCode, Recycle, ScanBarcode } from "lucide-react";
+import { ArrowUp, MapPin, QrCode, Recycle, ScanBarcode } from "lucide-react";
 import { apiFetch } from "../../lib/api";
 
 const actions = [
   { href: "/scan", label: "Scan Voucher", text: "Add a deposit receipt", icon: ScanBarcode },
   { href: "/pay", label: "Pay with QR", text: "Spend at any store", icon: QrCode },
   { href: "/itemscan", label: "Scan Items", text: "Bottles and cans", icon: Recycle },
+  { href: "/returnpoints", label: "Return Points", text: "Machines near you", icon: MapPin },
 ];
 
 export default function DashboardPage() {

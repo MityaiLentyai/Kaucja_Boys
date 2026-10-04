@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from "@zxing/library";
+import AppShell from "@/components/AppShell";
 import { apiFetch } from "@/lib/api";
 
 interface ScanItemResponse {
@@ -284,16 +285,15 @@ export default function ScanItemPage() {
   const totalValue = itemCount * 0.5;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 max-w-md mx-auto flex flex-col space-y-5">
+    <AppShell title="Scan Items" subtitle="Bottles and cans" onBack={handleBackNavigation}>
       {warningModalMessage && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center space-y-4 shadow-xl">
-            <h3 className="text-lg font-bold text-gray-900">Warning</h3>
-            <p className="text-sm font-semibold text-red-600">{warningModalMessage}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm space-y-4 rounded-3xl border border-white/10 bg-[#1a0f1c] p-6 text-center shadow-[0_30px_80px_-20px_rgba(208,154,189,0.45)]">
+            <h3 className="font-display text-lg font-semibold text-white">Warning</h3>
+            <p className="text-sm font-semibold text-red-300">{warningModalMessage}</p>
             <button
               onClick={() => setWarningModalMessage(null)}
-              className="w-full py-2.5 text-white font-bold text-sm rounded-xl shadow"
-              style={{ backgroundColor: "rgb(208, 154, 189)" }}
+              className="w-full rounded-full bg-[#d09abd] py-2.5 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2]"
             >
               Acknowledge
             </button>
@@ -301,23 +301,12 @@ export default function ScanItemPage() {
         </div>
       )}
 
-      <header className="flex items-center justify-between border-b pb-3">
-        <button
-          onClick={handleBackNavigation}
-          className="text-sm font-semibold text-gray-600 hover:text-gray-900"
-        >
-          ← Back
-        </button>
-        <h1 className="text-lg font-bold text-gray-800">Scan Kaucja Item</h1>
-        <div className="w-8" />
-      </header>
+      <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-black">
+        <video ref={videoRef} playsInline muted className="h-full w-full object-cover" />
 
-      <div className="relative w-full aspect-square bg-black rounded-2xl overflow-hidden shadow-inner flex items-center justify-center">
-        <video ref={videoRef} playsInline muted className="w-full h-full object-cover" />
-
-        <div className="absolute inset-0 border-2 border-transparent flex items-center justify-center pointer-events-none">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div
-            className="w-3/4 h-36 rounded-xl border-4 border-dashed relative animate-pulse"
+            className="relative h-36 w-3/4 animate-pulse rounded-xl border-4 border-dashed"
             style={{ borderColor: "rgb(208, 154, 189)" }}
           >
             <div
@@ -328,24 +317,24 @@ export default function ScanItemPage() {
         </div>
 
         {cameraError && (
-          <div className="absolute inset-0 bg-black/80 flex items-center justify-center p-6 text-center text-sm text-gray-200">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/80 p-6 text-center text-sm text-white/70">
             {cameraError}
           </div>
         )}
       </div>
 
-      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+      <div className="flex items-center justify-between rounded-3xl border border-white/10 bg-gradient-to-br from-[#3a1d36] via-[#24121f] to-[#140b17] p-5">
         <div>
-          <span className="text-xs uppercase tracking-wider font-bold text-gray-400">
+          <span className="text-xs font-semibold uppercase tracking-wider text-white/40">
             Scanned Items
           </span>
-          <div className="text-2xl font-extrabold text-gray-800">{itemCount} pcs</div>
+          <div className="font-display text-2xl font-semibold">{itemCount} pcs</div>
         </div>
         <div className="text-right">
-          <span className="text-xs uppercase tracking-wider font-bold text-gray-400">
+          <span className="text-xs font-semibold uppercase tracking-wider text-white/40">
             Total Refund
           </span>
-          <div className="text-2xl font-extrabold text-[rgb(208,154,189)]">
+          <div className="font-display text-2xl font-semibold text-[#d09abd]">
             +{totalValue.toFixed(2)} PLN
           </div>
         </div>
@@ -353,33 +342,33 @@ export default function ScanItemPage() {
 
       {feedback && (
         <div
-          className={`p-3 rounded-xl text-sm font-semibold text-center transition-all ${
+          className={`rounded-2xl border p-3 text-center text-sm font-semibold ${
             feedback.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-              : "bg-red-50 text-red-700 border border-red-200"
+              ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
+              : "border-red-400/30 bg-red-400/10 text-red-300"
           }`}
         >
           {feedback.message}
         </div>
       )}
 
-      <div className="flex-1 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col space-y-3 overflow-y-auto max-h-48">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+      <div className="max-h-48 flex-1 space-y-3 overflow-y-auto rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
           Session Items ({items.length})
         </h2>
         {items.length === 0 ? (
-          <p className="text-xs text-gray-400 italic text-center py-4">
+          <p className="py-4 text-center text-xs italic text-white/40">
             Align item barcode inside the viewfinder to scan.
           </p>
         ) : (
-          <ul className="divide-y divide-gray-100 space-y-2">
+          <ul className="divide-y divide-white/10">
             {items.map((item) => (
-              <li key={item.id} className="pt-2 flex justify-between items-center text-xs">
+              <li key={item.id} className="flex items-center justify-between py-2 text-xs">
                 <div>
-                  <p className="font-semibold text-gray-700">{item.name}</p>
-                  <p className="text-gray-400 font-mono">{item.barcode}</p>
+                  <p className="font-semibold text-white/90">{item.name}</p>
+                  <p className="font-mono text-white/40">{item.barcode}</p>
                 </div>
-                <span className="font-bold text-emerald-600">+0.50 PLN</span>
+                <span className="font-bold text-emerald-300">+0.50 PLN</span>
               </li>
             ))}
           </ul>
@@ -389,11 +378,10 @@ export default function ScanItemPage() {
       <button
         onClick={handleFinish}
         disabled={loading}
-        className="w-full py-3 text-white font-bold text-sm rounded-xl shadow transition-opacity disabled:opacity-50"
-        style={{ backgroundColor: "rgb(208, 154, 189)" }}
+        className="w-full rounded-full bg-[#d09abd] py-3 text-sm font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] transition hover:bg-[#e2b5d2] disabled:opacity-50"
       >
         {loading ? "Processing..." : `Finish (${itemCount} items • ${totalValue.toFixed(2)} PLN)`}
       </button>
-    </div>
+    </AppShell>
   );
 }
