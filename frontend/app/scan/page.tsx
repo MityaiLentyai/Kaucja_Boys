@@ -6,10 +6,7 @@ import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from "@zxing/
 import AppShell from "@/components/AppShell";
 import Spinner from "@/components/Spinner";
 import { apiFetch } from "@/lib/api";
-
-// Voucher validity is decided by the server (it is a database lookup), so the
-// client only gates on a code being plausible enough to be worth submitting.
-const MIN_BARCODE_LENGTH = 4;
+import { extractVoucherCode, isPaymentCode } from "@/lib/vouchers";
 
 interface ScanResponse {
   message: string;
@@ -26,6 +23,8 @@ export default function ScanVoucherPage() {
   const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const isSubmittingRef = useRef(false);
+  const claimedCodesRef = useRef<Set<string>>(new Set());
+  const submitRef = useRef<(raw: string) => Promise<void>>(async () => undefined);
 
   const [manualBarcode, setManualBarcode] = useState("");
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -38,7 +37,7 @@ export default function ScanVoucherPage() {
     if (codeReaderRef.current) {
       try {
         codeReaderRef.current.reset();
-      } catch (err) {}
+      } catch {}
       codeReaderRef.current = null;
     }
 
@@ -62,8 +61,8 @@ export default function ScanVoucherPage() {
     const originalConsoleLog = console.log;
 
     const filterZXingLogs = (originalFn: typeof console.error) => {
-      return (...args: any[]) => {
-        const msg = args[0]?.toString() || "";
+      return (...args: unknown[]) => {
+        const msg = String(args[0] ?? "");
         if (
           msg.includes("MultiFormatReader") ||
           msg.includes("NotFoundException") ||
@@ -84,12 +83,16 @@ export default function ScanVoucherPage() {
         setCameraError(null);
 
         const hints = new Map();
+        hints.set(DecodeHintType.TRY_HARDER, true);
         hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-          BarcodeFormat.QR_CODE, // Added QR code support
-          BarcodeFormat.EAN_13,
-          BarcodeFormat.EAN_8,
+          BarcodeFormat.QR_CODE,
+          BarcodeFormat.DATA_MATRIX,
+          BarcodeFormat.AZTEC,
+          BarcodeFormat.PDF_417,
           BarcodeFormat.CODE_128,
           BarcodeFormat.CODE_39,
+          BarcodeFormat.EAN_13,
+          BarcodeFormat.EAN_8,
           BarcodeFormat.UPC_A,
           BarcodeFormat.UPC_E,
         ]);
@@ -115,18 +118,19 @@ export default function ScanVoucherPage() {
             );
             selectedDeviceId = backCamera ? backCamera.deviceId : videoInputDevices[0].deviceId;
           }
-        } catch (permErr) {}
+        } catch {
+          /* permission prompt failed — decodeFromVideoDevice will surface it */
+        }
 
         if (!isMounted) return;
 
         await reader.decodeFromVideoDevice(selectedDeviceId, videoRef.current, (result) => {
           if (result && !isSubmittingRef.current && isMounted) {
             isSubmittingRef.current = true;
-            const code = result.getText();
-            handleVoucherSubmit(code);
+            void submitRef.current(result.getText());
           }
         });
-      } catch (err: any) {
+      } catch {
         if (isMounted) {
           setCameraError(
             "Camera access denied or unavailable. You can enter the code manually below.",
@@ -145,9 +149,38 @@ export default function ScanVoucherPage() {
     };
   }, []);
 
-  const handleVoucherSubmit = async (barcodeToSubmit: string) => {
-    const barcode = barcodeToSubmit.trim();
-    if (barcode.length < MIN_BARCODE_LENGTH || loading) return;
+  const handleVoucherSubmit = async (rawInput: string) => {
+    const raw = rawInput.trim();
+
+    if (isPaymentCode(raw)) {
+      isSubmittingRef.current = false;
+      setFeedback({
+        type: "error",
+        message: "That's a payment QR, not a deposit voucher.",
+      });
+      return;
+    }
+
+    const barcode = extractVoucherCode(raw);
+    if (!barcode || loading) {
+      isSubmittingRef.current = false;
+      if (!barcode) {
+        setFeedback({
+          type: "error",
+          message: "Could not read a valid voucher from that barcode or QR.",
+        });
+      }
+      return;
+    }
+
+    if (claimedCodesRef.current.has(barcode.toUpperCase())) {
+      isSubmittingRef.current = false;
+      setFeedback({
+        type: "error",
+        message: "This voucher has already been claimed.",
+      });
+      return;
+    }
 
     setLoading(true);
     setFeedback(null);
@@ -155,49 +188,53 @@ export default function ScanVoucherPage() {
     try {
       const res = await apiFetch<ScanResponse>("/vouchers/scan", {
         method: "POST",
-        body: JSON.stringify({ barcode }),
+        body: JSON.stringify({ barcode, raw_payload: raw }),
       });
 
+      claimedCodesRef.current.add(barcode.toUpperCase());
       stopCameraHardware();
 
       setFeedback({
         type: "success",
-        message: `Success! Added +${res.amount.toFixed(2)} PLN from ${res.issuer_store}. New balance: ${res.new_balance.toFixed(2)} PLN`,
+        message: `Added +${res.amount.toFixed(2)} PLN from ${res.issuer_store}. New balance: ${res.new_balance.toFixed(2)} PLN`,
       });
 
-      // Stay in the loading state so the claim cannot be fired twice while the
-      // success banner is up and the redirect is pending.
+      // Wallet-only credit. Return-batch cards are created by /itemscan, never here.
       setTimeout(() => {
         router.push("/dashboard");
       }, 1500);
-    } catch (err: any) {
+    } catch (err) {
       isSubmittingRef.current = false;
       setFeedback({
         type: "error",
-        message: err.message || "Failed to process voucher.",
+        message: err instanceof Error ? err.message : "Failed to process voucher.",
       });
       setLoading(false);
     }
   };
+
+  submitRef.current = handleVoucherSubmit;
 
   const handleBackNavigation = () => {
     stopCameraHardware();
     router.push("/dashboard");
   };
 
-  const trimmedBarcode = manualBarcode.trim();
-  const canClaim = !loading && trimmedBarcode.length >= MIN_BARCODE_LENGTH;
+  const extractedManual = extractVoucherCode(manualBarcode);
+  const canClaim = !loading && extractedManual !== null && !isPaymentCode(manualBarcode);
 
   return (
-    <AppShell title="Scan Voucher" subtitle="Add a deposit receipt" onBack={handleBackNavigation}>
-      {/* Camera Viewfinder */}
+    <AppShell
+      title="Scan Voucher"
+      subtitle="Barcode or QR · credits your wallet"
+      onBack={handleBackNavigation}
+    >
       <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-black">
         <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
 
-        {/* Scanner Target Frame in Theme Color rgb(208, 154, 189) */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-4">
           <div
-            className="relative h-36 w-3/4 animate-pulse rounded-xl border-4 border-dashed"
+            className="relative h-52 w-52 animate-pulse rounded-2xl border-4 border-dashed"
             style={{ borderColor: "rgb(208, 154, 189)" }}
           >
             <div
@@ -205,6 +242,9 @@ export default function ScanVoucherPage() {
               style={{ backgroundColor: "rgb(208, 154, 189)" }}
             />
           </div>
+          <p className="rounded-full bg-black/55 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/70">
+            Barcode or QR
+          </p>
         </div>
 
         {cameraError && (
@@ -214,7 +254,6 @@ export default function ScanVoucherPage() {
         )}
       </div>
 
-      {/* Feedback Banner */}
       {feedback && (
         <div
           className={`rounded-2xl border p-4 text-center text-sm font-semibold ${
@@ -227,25 +266,30 @@ export default function ScanVoucherPage() {
         </div>
       )}
 
-      {/* Manual Input Fallback */}
-      <div className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+      <form
+        className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canClaim && extractedManual) void handleVoucherSubmit(manualBarcode);
+        }}
+      >
         <h2 className="text-xs font-semibold uppercase tracking-wider text-white/40">
-          Manual Voucher Entry
+          Manual voucher entry
         </h2>
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="e.g., KAUCJA-100"
+            placeholder="KAUCJA-100 or kaucash://voucher?code=KAUCJA-100"
             disabled={loading}
             className="flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm text-white outline-none placeholder:text-white/40 focus:border-[#d09abd] focus:ring-2 focus:ring-[#d09abd]/30 disabled:cursor-not-allowed disabled:opacity-60"
             value={manualBarcode}
             onChange={(e) => setManualBarcode(e.target.value)}
           />
           <button
-            onClick={() => handleVoucherSubmit(trimmedBarcode)}
+            type="submit"
             disabled={!canClaim}
             aria-busy={loading}
-            title={canClaim ? undefined : "Enter a voucher code to claim it"}
+            title={canClaim ? undefined : "Enter a voucher barcode or QR payload"}
             className="btn btn-primary px-5 py-2.5 text-sm"
           >
             {loading ? (
@@ -259,12 +303,13 @@ export default function ScanVoucherPage() {
           </button>
         </div>
         <p className="text-xs text-white/40">
-          Demo codes available:{" "}
+          Valid once. Credits the wallet directly — no return-batch card. Demo:{" "}
           <code className="rounded bg-white/10 px-1.5 py-0.5 text-white/70">KAUCJA-100</code> (10
           PLN), <code className="rounded bg-white/10 px-1.5 py-0.5 text-white/70">KAUCJA-050</code>{" "}
-          (5 PLN).
+          (5 PLN), <code className="rounded bg-white/10 px-1.5 py-0.5 text-white/70">KAUCJA-025</code>{" "}
+          (2.50 PLN).
         </p>
-      </div>
+      </form>
     </AppShell>
   );
 }

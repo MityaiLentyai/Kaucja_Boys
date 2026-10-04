@@ -15,5 +15,10 @@ def scan_voucher(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    result = process_voucher_claim(db, user_id=current_user.id, barcode=payload.barcode)
+    result = process_voucher_claim(
+        db,
+        user_id=current_user.id,
+        barcode=payload.barcode,
+        raw_payload=payload.raw_payload,
+    )
     return result

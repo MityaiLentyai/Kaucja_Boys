@@ -43,13 +43,29 @@ def seed_demo_data():
             db.add(demo_user)
             db.commit()
 
-        # Seed test vouchers
-        if not db.query(Voucher).filter(Voucher.code == "KAUCJA-100").first():
-            vouchers = [
-                Voucher(code="KAUCJA-100", amount=10.0, issuer_store="Biedronka", status=VoucherStatus.NEW),
-                Voucher(code="KAUCJA-050", amount=5.0, issuer_store="Lidl", status=VoucherStatus.NEW),
-            ]
-            db.add_all(vouchers)
+        # Seed missing demo vouchers one by one so a claimed KAUCJA-100
+        # does not block later codes from appearing.
+        demo_vouchers = [
+            ("KAUCJA-100", 10.0, "Biedronka"),
+            ("KAUCJA-050", 5.0, "Lidl"),
+            ("KAUCJA-025", 2.5, "Żabka"),
+            ("KAUCJA-200", 20.0, "Biedronka"),
+        ]
+        added = False
+        for code, amount, store in demo_vouchers:
+            if db.query(Voucher).filter(Voucher.code == code).first():
+                continue
+            db.add(
+                Voucher(
+                    code=code,
+                    amount=amount,
+                    issuer_store=store,
+                    status=VoucherStatus.NEW,
+                    barcode_format="QR_CODE",
+                )
+            )
+            added = True
+        if added:
             db.commit()
     finally:
         db.close()
