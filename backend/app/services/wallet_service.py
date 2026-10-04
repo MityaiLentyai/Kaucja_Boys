@@ -1,7 +1,7 @@
-# from sqlalchemy.orm import Session
-# from fastapi import HTTPException, status
-# from app.db.models import Wallet, WalletTransaction, TransactionType
-# from app.services.barcode_validation import is_valid_barcode, normalize_barcode
+from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+from app.db.models import Wallet, WalletTransaction, TransactionType
+from app.services.barcode_validation import is_valid_barcode, normalize_barcode
 from app.services.barcode_validation import normalize_barcode
 
 def get_or_create_wallet(db: Session, user_id: str | int) -> Wallet:
