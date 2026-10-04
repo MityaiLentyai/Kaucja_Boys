@@ -1,64 +1,78 @@
-# Kaucja_Boys
+# KauCash
 
-### Kaucja Web App Hackathon Plan
----
+**Kaucja that works everywhere.**
 
-# 1. One-line product vision
+KauCash is a universal digital wallet for Poland’s bottle-and-can deposit (kaucja). Store-specific slips from Biedronka, Lidl, or Żabka become one PLN balance you can spend at any participating checkout.
 
-Build a **web app that turns store-specific kaucja vouchers/receipts into a universal digital wallet in the Polish market**, enables users to **scan deposit/kaucja bottles and cans and receive instant deposited cash from the comfort of their homes**, and lets **cashier redemption via QR code connected to the web-app's wallet** along with **finding and reviewing deposit machines**
-
----
-
-# 2. Hackathon framing
-
-## What we are building in 24 hours
-
-A **working demo / MVP** with:
-
-- user sign-in
-- barcode scan of kaucja receipt/voucher
-- wallet balance storage
-- machine map with community reviews
-- cashier redemption via QR code
-- basic admin/store panel or cashier page to deduct value
-
-## What we are _not_ fully solving in 24 hours
-
-- real integration with Lidl / Biedronka / Żabka systems
-- real payments settlement between stores
-- legal / fiscal integration
-- production-grade fraud prevention
-- real machine firmware integration
-- full AI bottle-recognition pipeline in production
-
-Instead, we build:
-
-- a **credible prototype**
-- strong **architecture**
-- mocked integrations
-- clear upgrade path
+Built by **Kaucja Boys** · 42 Warsaw.
 
 ---
 
-# 3. Product concept
+## The problem
 
-## Core MVP flow
+Deposit value is locked to the chain that printed the slip. The proof is a scrap of paper that is easy to lose and quick to expire. Finding a machine that actually works is guesswork.
 
-1. User receives a barcode / receipt from a kaucja machine.
-2. User scans the barcode in the web app.
-3. App validates or simulates validation of the voucher.
-4. Voucher value is added to the user wallet.
-5. User can spend wallet value in **any participating store**.
-6. At checkout, user shows a **dynamic QR code**.
-7. Cashier scans the QR code.
-8. Backend deducts the amount from the wallet and records the transaction.
-9. Users can browse nearby deposit machines and submit reviews/status.
-10. Users get points for every deposit made, points that will be used for getting sponsored vouchers/discounts
+## What you can do
 
-## Stage 2 vision
+1. **Scan a slip** — camera or manual entry. A voucher is claimed once and credited to your wallet.
+2. **Scan bottles at home** — eligible containers go into a return batch. The deposit is credited now; you have 48 hours to take them back.
+3. **Pay with QR** — show a one-time code at any participating checkout.
+4. **Find a machine** — nearby return points with status (working, queue, out of order), what they accept, and directions.
 
-- home bottle pre-scan with AI + temporary wallet credit
-- debt tracking until physical return in 1–2 days
-- machine-side QR user identification
-- courier pickup marketplace for bottle collection
-- ***
+Accounts, balances, voucher claims, and item credits are persisted. Claims and recycled barcodes cannot be reused.
+
+---
+
+## Try it
+
+| | |
+| --- | --- |
+| App | [kaucja-boys.vercel.app](https://kaucja-boys.vercel.app) |
+| Demo login | `demo@kaucja.pl` / `password123` |
+| Demo slips | `KAUCJA-100` (10 PLN) · `KAUCJA-050` (5 PLN) · `KAUCJA-025` (2.50 PLN) |
+
+Register a new account, or use the demo user. After sign-in the dashboard shows the wallet, return batches, and the four actions above.
+
+---
+
+## How it is built
+
+```
+Next.js (App Router)  →  FastAPI + JWT  →  SQLite / Postgres
+```
+
+| Surface | What it does |
+| --- | --- |
+| Landing & how-it-works | Product story and the four-step flow |
+| Auth | Register, login, JWT session |
+| Wallet | Single PLN balance and return-batch cards |
+| `/scan` | Barcode / QR voucher claim → wallet top-up |
+| `/itemscan` | Bottle & can session → batch credit |
+| `/pay` | One-time payment QR for the cashier |
+| `/returnpoints` | Map of nearby machines and community status |
+
+Frontend: Next.js, React, Tailwind, ZXing (camera scan), Leaflet (map).  
+Backend: FastAPI, SQLAlchemy, JWT. Vouchers are single-use; item barcodes and wallet moves are written to an append-only ledger.
+
+---
+
+## Run locally
+
+**API** (needs [uv](https://docs.astral.sh/uv/)):
+
+```bash
+cd backend
+uv sync
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**App:**
+
+```bash
+cd frontend
+npm install
+# .env.local → NEXT_PUBLIC_API_URL=http://localhost:8000
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). API docs: [http://localhost:8000/docs](http://localhost:8000/docs).
