@@ -26,6 +26,108 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
+/* Pill buttons. The primary carries a darker rim; the secondary pulses to invite a click.
+   Both drop their animation on hover so the hover state can take over cleanly. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border-style: solid;
+  border-width: 2px;
+  font-weight: 600;
+  text-align: center;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid #f3d9ea;
+  outline-offset: 3px;
+}
+
+.btn-primary {
+  background-color: #d09abd;
+  border-color: #7f4866;
+  color: #1a0d1a;
+  animation: btn-primary-glow 3.6s ease-in-out infinite;
+}
+
+.btn-primary:hover:not(:disabled) {
+  animation: none;
+  background-color: #e2b5d2;
+  border-color: #b36b91;
+  box-shadow: 0 0 32px -4px rgba(208, 154, 189, 0.95);
+}
+
+@keyframes btn-primary-glow {
+  0%,
+  100% {
+    border-color: #7f4866;
+    box-shadow: 0 0 20px -8px rgba(208, 154, 189, 0.5);
+  }
+  50% {
+    border-color: #a85f87;
+    box-shadow: 0 0 26px -4px rgba(208, 154, 189, 0.8);
+  }
+}
+
+.btn-secondary {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: rgba(208, 154, 189, 0.45);
+  color: #ffffff;
+  animation: btn-secondary-glow 2.6s ease-in-out infinite;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  animation: none;
+  background-color: rgba(208, 154, 189, 0.12);
+  border-color: #d09abd;
+  box-shadow: 0 0 26px -4px rgba(208, 154, 189, 0.7);
+}
+
+/* Same shape as the secondary, but a plain white rim and no pulse. */
+.btn-outline {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+}
+
+.btn:disabled {
+  animation: none;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@keyframes btn-secondary-glow {
+  0%,
+  100% {
+    border-color: rgba(208, 154, 189, 0.3);
+    box-shadow: 0 0 0 0 rgba(208, 154, 189, 0);
+  }
+  50% {
+    border-color: rgba(208, 154, 189, 0.95);
+    box-shadow: 0 0 18px -4px rgba(208, 154, 189, 0.55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary,
+  .btn-secondary {
+    animation: none;
+  }
+}
+
 /* Leaflet map on the return points page */
 .leaflet-container {
   background: #140b17;

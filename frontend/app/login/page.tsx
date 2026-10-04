@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "../../lib/api";
 import { saveToken } from "../../lib/auth";
 
 export default function LoginPage() {
@@ -33,8 +32,8 @@ export default function LoginPage() {
       const data = await res.json();
       saveToken(data.access_token);
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 
@@ -77,13 +76,26 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button
-            type="submit"
-            className="w-full rounded-full bg-[#d09abd] px-4 py-3 font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] hover:bg-[#e2b5d2]"
-          >
+          <div className="flex justify-end">
+            <button
+              type="button"
+              disabled
+              title="Password recovery is not available yet"
+              className="cursor-not-allowed text-xs font-semibold text-white/30"
+            >
+              Forgot password?
+            </button>
+          </div>
+          <button type="submit" className="btn btn-primary w-full px-4 py-3">
             Sign In
           </button>
         </form>
+        <p className="text-center text-sm text-white/50">
+          New here?{" "}
+          <Link href="/register" className="font-semibold text-[#d09abd] hover:text-[#e2b5d2]">
+            Register
+          </Link>
+        </p>
         <p className="text-center text-xs text-white/40">One wallet. Every store. Every time.</p>
       </div>
     </div>

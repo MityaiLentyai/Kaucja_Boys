@@ -81,11 +81,8 @@ export default function Home() {
           <Link href="/login" className="rounded-full px-4 py-2 text-white/80 hover:text-white">
             Sign in
           </Link>
-          <Link
-            href="/scan"
-            className="rounded-full bg-[#d09abd] px-4 py-2 font-semibold text-[#1a0d1a] hover:bg-[#e2b5d2]"
-          >
-            Scan a receipt
+          <Link href="/register" className="btn btn-outline px-4 py-2">
+            Register
           </Link>
         </nav>
       </header>
@@ -114,18 +111,9 @@ export default function Home() {
           <PhoneMockup />
         </section>
 
-        <section className="mt-8 flex flex-wrap justify-center gap-4">
-          <Link
-            href="/login"
-            className="rounded-full bg-[#d09abd] px-8 py-3 text-base font-semibold text-[#1a0d1a] shadow-[0_0_30px_rgba(208,154,189,0.4)] hover:bg-[#e2b5d2]"
-          >
-            Open my wallet
-          </Link>
-          <Link
-            href="/scan"
-            className="rounded-full border border-white/20 px-8 py-3 text-base font-semibold text-white hover:bg-white/10"
-          >
-            Scan a receipt
+        <section className="mt-8 flex justify-center">
+          <Link href="/how-it-works" className="btn btn-primary px-8 py-3 text-base">
+            How it works?
           </Link>
         </section>
 
@@ -144,7 +132,7 @@ export default function Home() {
       </main>
 
       <footer className="relative z-10 mx-auto w-full max-w-6xl px-6 py-6 text-xs text-white/40">
-        Kaucja Boys · Hackathon
+        Kaucja Boys · 42 Warsaw
       </footer>
     </div>
   );
